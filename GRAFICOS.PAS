@@ -1,30 +1,8 @@
-(****************************************************************************)
-(****************************************************************************)
-(*                                                                          *)
-(*                                                                          *)
-(*                           SOCIOS ACTE 1.0                                *)
-(*                       ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ                           *)
-(*                                                                          *)
-(*    Autor  : Argos (Iv n Gonz lez Angullo)                                *)
-(*                                                                          *)
-(*    Unidad : "GRAFICOS"                                                   *)
-(*                                                                          *)
-(*    Fecha  : 28/3/1997                                                    *)
-(*                                                                          *)
-(*    Descripcion : Definiciones de Tipos y Variables del Programa.         *)
-(*                                                                          *)
-(*    Observacion : Hay que pulirlo mucho a£n....  :-((                     *)
-(*                                                                          *)
-(****************************************************************************)
-(****************************************************************************)
-
-
-
 unit graficos;
 
 interface
 
-	uses defs;
+  uses defs;
 
 	procedure gettext (inix,iniy,finx,finy:byte; var buffer:videomatrix);
 	procedure puttext (inix,iniy,finx,finy:byte; var buffer:videomatrix);
@@ -32,12 +10,24 @@ interface
 	procedure write_msg (msg:string);
 	procedure lowbar (back:string);
 	procedure bars;
-{	procedure swap_menu (inicio,y,len:byte);
-}	procedure write_n_digits (code,n:byte);
+	procedure swap_menu (inicio,y,len:byte);
+	procedure write_n_digits (code,n:byte);
 	procedure write_right(code:longint;end_x:byte);
 	procedure write_left(code:longint; lengt:byte);
 	procedure recuadro (x,y,ancho,alto:byte);
-	procedure recuadro_socio (x,y:byte);
+	procedure recuadro_cliente (x,y:byte);
+	procedure recuadro_tarifas_cliente (x,y:byte);
+	procedure recuadro_casillas (x,y:byte);
+	procedure recuadro_albaran (x,y:byte);
+	procedure recuadro_comercial (x,y:byte);
+	procedure recuadro_mensajero (x,y:byte);
+	procedure recuadro_tarifas_mensajero (x,y:byte);
+	procedure recuadro_facturas (x,y:byte);
+	procedure recuadro_factura_mensajero(x,y:byte);
+	procedure recuadro_factura_comercial(x,y:byte);
+	procedure recuadro_factura_general(x,y:byte);
+	procedure recuadro_pie_factura(x,y:byte);
+	procedure recuadro_cabecera_albaranes(x,y:byte);
 	function hoy:string;
 	procedure error (mode:byte);
 
@@ -45,7 +35,7 @@ interface
 implementation
 
 
-	USES Crt,common;
+  USES Crt,common;
 
 
 	CONST
@@ -56,8 +46,9 @@ implementation
 
 (* Almacena en una videomatrix un recuadro de la pantalla *)
 
-	procedure gettext;
+  procedure gettext;
 	var
+		screen_image : videomatrix absolute($B800):$0000;
 		i,j : word;
 		a : word;
 	begin
@@ -68,7 +59,7 @@ implementation
 				j:=2*finx+160*iniy-161;
 				while (i<=j) do
 					begin
-						buffer[a]:=pantalla[i];
+						buffer[a]:=screen_image[i];
 						inc(a);
 						inc(i);
 					end;
@@ -80,8 +71,9 @@ implementation
 
 (* Escribe en un recuadro de la pantalla una videomatrix *)
 
-	procedure puttext;
+  procedure puttext;
 	var
+		screen_output : videomatrix absolute($B800):$0000;
 		i,j : word;
 		a : word;
 	begin
@@ -92,7 +84,7 @@ implementation
 				j:=2*finx+160*iniy-161;
 				while (i<=j) do
 					begin
-						pantalla[i]:=buffer[a];
+						screen_output[i]:=buffer[a];
 						inc(a);
 						inc(i);
 					end;
@@ -106,15 +98,16 @@ implementation
 
 	procedure escribe (cad : string; color : byte);
 	var
+		scr_output : videomatrix absolute($B800):$0000;
 		i,j        : word;
 	begin
 		j:=1;
 		i:=2*wherex+3839;
 		while j<=length(cad) do
 			begin
-				pantalla[i]:=ord(cad[j]);
+				scr_output[i]:=ord(cad[j]);
 				inc(i);
-				pantalla[i]:=color;
+				scr_output[i]:=color;
 				inc(i);
 				inc(j)
 			end;
@@ -126,7 +119,8 @@ implementation
 (* Borra un recuadro en pantalla *)
 
 	procedure blackout (inix, iniy, finx, finy : byte);
-	var
+	VAR
+		screen_output:videomatrix absolute($B800):$0000;
 		i,j:word;
 	begin
 		while (iniy<=finy) do
@@ -135,9 +129,9 @@ implementation
 				j:=2*finx+160*iniy-161;
 				while (i<=j) do
 					begin
-						pantalla[i]:=32;
+						screen_output[i]:=32;
 						inc(i);
-						pantalla[i]:=0;
+						screen_output[i]:=0;
 						inc(i)
 					end;
 				inc(iniy)
@@ -160,7 +154,7 @@ implementation
 
 
 
-(* Escribe la funci¢n que realiza la tecla Esc.(La pone en la barra de abajo *)
+(* Escribe la funci¢n que realiza la tecla Esc. *)
 
 	procedure lowbar ( back:string );
 	const eskey='  Esc - ';
@@ -170,7 +164,7 @@ implementation
 		escribe(eskey,yellow_on_blue);
 		escribe(back,white_on_blue);
 		gotoxy(60,25);
-		escribe('(c) SIGNUM Tech. 1997',cyan_on_blue);
+		escribe('(c) SIGNUM Tech. 1996',cyan_on_blue);
 		textcolor(lightgray);
 		textbackground(black);
 		cursor_off
@@ -194,7 +188,7 @@ implementation
 					 write(' ');
 			end;
 		gotoxy(1,1);
-		write('   GESTIONAcTE  1.0                                   ');
+		write('     MENSA-GES  1.0                                   ');
 		gotoxy(50,1);
 		write(fecha_sistema.day,' de ');
 		case fecha_sistema.month of
@@ -217,6 +211,48 @@ implementation
 
 
 
+(* Animacioncilla para cambiar de menu *)
+
+	procedure swap_menu (inicio, y, len : byte);
+	var x:byte;
+	begin
+		blackout(1,6,80,23);
+		textcolor(11);
+		for x:=0 to 32-inicio do
+			begin
+				gotoxy(inicio+x,y);
+				write(' °±²ÛÛ');
+				gotoxy(inicio+len-x-6,y);
+				write('ÛÛ²±° ');
+				cursor_off;
+				delay(15);
+			end;
+		gotoxy(33,y);
+		write(' °±²ÛÛ²±° ');
+		cursor_off;
+		delay(15);
+		gotoxy(34,y);
+		write(' °±²²±° ');
+		cursor_off;
+		delay(15);
+		gotoxy(35,y);
+		write(' °±±° ');
+		cursor_off;
+		delay(15);
+		gotoxy(36,y);
+		write(' °° ');
+		cursor_off;
+		delay(15);
+		gotoxy(37,y);
+		write('  ');
+		cursor_off;
+		delay(15);
+		textcolor(lightgray)
+	end;
+
+
+
+
 { comentario: escribe una cifra (thinking) con tantos digitos como mandeeee }
 (* Nosotros nos entendemos *)
 	procedure write_n_digits (code,n:byte);
@@ -227,7 +263,7 @@ implementation
 		write(cad);
 	end;
 
-
+	
 (* Escribe una cifra pegada a la derecha de un recuadro *)
 	procedure write_right;
 	var cad:string;l:byte;
@@ -239,7 +275,6 @@ implementation
 	end;
 
 
-(* Escribe una cifra pegada a la izquierda de un recuadro *)
 	procedure write_left;
 	var cad:string;
 	begin
@@ -250,6 +285,7 @@ implementation
 
 
 (* Dibuja una ventana normal y corriente, cuadriculada *)
+
 	procedure recuadro (x, y, ancho, alto : byte);
 	var k:word;
 	begin
@@ -275,47 +311,387 @@ implementation
 
 
 
-(* Dibuja el patr¢n de inserci¢n de socios, pos 3,2 *)
-	procedure recuadro_socio (x, y : byte);
+(* Dibuja el patr¢n de inserci¢n de clientes, pos 3,2 *)
+
+	procedure recuadro_cliente (x, y : byte);
 	begin
 		textcolor(11);
 		textbackground(black);
 		inc(x);
 		gotoxy(x,y+1);
+		write('Telefono  :');
+		gotoxy(x,y+3);
 		write('Nombre    :');
-		gotoxy(x,y+2);
-		write('D.N.I.    :          Fecha de Nacimiento:  /  /  ');
-		gotoxy(x,y+4);
-		write('Direcci¢n ');
 		gotoxy(x,y+5);
 		write('Calle     :');
 		gotoxy(x,y+6);
-		write('N£mero    :     Piso:    Letra:   C.Postal:');
+		write('N£mero    :     Piso:     Letra:   C.Postal:');
 		gotoxy(x,y+7);
 		write('Localidad :');
 		gotoxy(x,y+8);
-		write('Provincia :                       Tel‚fono:');
+		write('Provincia :');
 		gotoxy(x,y+10);
-		write('Direcci¢n Familiar');
+		write('C.I.F.    :            Comer.:    Desc.:    R.E.: ');
 		gotoxy(x,y+11);
-		write('Calle     :');
+		write('F. de Pago:');
 		gotoxy(x,y+12);
-		write('N£mero    :     Piso:    Letra:   C.Postal:');
-		gotoxy(x,y+13);
-		write('Localidad :');
+		write('Cobrar Reembolso:');
 		gotoxy(x,y+14);
-		write('Provincia :                       Tel‚fono:');
-		gotoxy(x,y+16);
-		write('Saldo     :');
-		gotoxy(x,y+17);
 		write('Obvnes.   :');
 		dec(x);
-		dec(x);
-		recuadro(x,y,53,21);
+		recuadro(x,y,53,17);
 		textcolor(lightgray);
 		cursor_off
 	end;
 
+
+
+(* Dibuja el cuadro de inserci¢n de tarifas, pos 15,12 *)
+
+	procedure recuadro_tarifas_cliente (x, y : byte);
+	var k:word;
+	begin
+		gotoxy(x,y);
+		textcolor(11);
+		textbackground(BLACK);
+		write('ÚÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄ¿');
+		gotoxy(x,y+1);
+		write('³Tipo ³ Descripci¢n ³ Precio ³ Ex.Peso ³ Ex.Tmpo ³ Ex. Km ³');
+		gotoxy(x,y+2);
+		write('ÃÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄ´');
+		for k:=y+3 to y+11 do
+			begin
+				gotoxy(x,k);
+				write('³     ³             ³        ³         ³         ³        ³');
+			end;
+		gotoxy(x,y+12);
+		write('ÀÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÙ');
+		for k:=0 to 8 do
+			begin
+				gotoxy(x+2,y+3+k);
+				write_n_digits(k+1,2);
+			end;
+		textcolor(lightgray);
+		cursor_off
+	end;
+
+
+
+(* Dibuja el patr¢n de inserci¢n de las casillas de albaranes, pos 3,8 *)
+
+	procedure recuadro_casillas (x, y : byte);
+	begin
+		textcolor(11);
+		gotoxy(x,y);
+		write('ÚÄÄÄÄÄÄÄÄÄÄÄ¿');
+		gotoxy(x,y+1);
+		write('³CASILLA    ³');
+		gotoxy(x,y+2);
+		write('ÃÄÄÄÄÄÄÄÄÂÄÄÁÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄ¿');
+		gotoxy(x,y+3);
+		write('³Men.:   ³Sv.C.:   ³Sv.M.:   ³Peso:     ³Tiempo:    ³Km:     ³Fact.:  ³');
+		gotoxy(x,y+4);
+		write('ÃÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÙ');
+		gotoxy(x,y+5);
+		write('³Nombre   :                                         ³');
+		gotoxy(x,y+6);
+		write('ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄ¿');
+		gotoxy(x,y+7);
+		write('³Direcci¢n:                                         ³Hora:     ³');
+		gotoxy(x,y+8);
+		write('ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÙ');
+		gotoxy(x,y+9);
+		write('³Reembolso:          ³');
+		gotoxy(x,y+10);
+		write('ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ');
+		textcolor(lightgray);
+		cursor_off
+	end;
+
+
+
+(* Dibuja el patr¢n de inserci¢n de albaranes, pos 3,4 *)
+
+	procedure recuadro_albaran (x, y : byte);
+	begin
+		textcolor(11);
+		gotoxy(x,y);
+		write('ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄ¿');
+		gotoxy(x,y+1);
+		write('³Tfno.:          ³Fecha:    /  /    ³Portes:     ³Cod:         ³');
+		gotoxy(x,y+2);
+		write('ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄ´');
+		gotoxy(x+14,y+3);
+		write('³Obvnes.:                                        ³');
+		gotoxy(x+14,y+4);
+		write('³                                                ³');
+		gotoxy(x+14,y+5);
+		write('ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ');
+		textcolor(lightgray);
+		cursor_off
+	end;
+
+
+
+(* Dibuja el patr¢n de inserci¢n de comerciales,  pos 3,3 *)
+
+	procedure recuadro_comercial (x, y : byte);
+	begin
+		textcolor(11);
+		inc(x);
+		gotoxy(x,y+1);
+		write('Telefono  :                Codigo:');
+		gotoxy(x,y+3);
+		write('Nombre    :');
+		gotoxy(x,y+5);
+		write('Calle     :');
+		gotoxy(x,y+6);
+		write('N£mero    :     Piso:     Letra:   C.Postal:');
+		gotoxy(x,y+7);
+		write('Localidad :');
+		gotoxy(x,y+8);
+		write('Provincia :');
+		gotoxy(x,y+10);
+		write('Ex.Laboral:');
+		gotoxy(x,y+12);
+		write('Estudios  :');
+		gotoxy(x,y+14);
+		write('C.I.F.    :                      Porcentaje:');
+		gotoxy(x,y+16);
+		write('Obvnes.   :');
+		dec(x);
+		recuadro(x,y,53,19);
+		textcolor(lightgray);
+		cursor_off
+	end;
+
+
+
+(* Dibuja el patr¢n de inserci¢n de mensajeros, pos 3,3 *)
+
+	procedure recuadro_mensajero (x, y : byte);
+	begin
+		textcolor(11);
+		inc(x);
+		gotoxy(x,y+1);
+		write('Telefono  :                Codigo:');
+		gotoxy(x,y+3);
+		write('Nombre    :');
+		gotoxy(x,y+5);
+		write('Calle     :');
+		gotoxy(x,y+6);
+		write('N£mero    :     Piso:     Letra:   C.Postal:');
+		gotoxy(x,y+7);
+		write('Localidad :');
+		gotoxy(x,y+8);
+		write('Provincia :');
+		gotoxy(x,y+10);
+		write('C.I.F.    :            E.Civil:   S.Mil.:   Veh.: ');
+		gotoxy(x,y+12);
+		write('Obvnes.   :');
+		dec(x);
+		recuadro(x,y,53,15);
+		textcolor(7);
+		cursor_off
+	end;
+
+
+
+(* Dibuja el cuadro de inserci¢n de las tarifas de los mensajeros, pos 3,5 *)
+
+	procedure recuadro_tarifas_mensajero (x, y : byte);
+	var k : byte;
+	begin
+		textcolor(11);
+		gotoxy(x,y);
+		write('ÚÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄ¿');
+		gotoxy(x,y+1);
+		write('³Tipo ³ Descripci¢n ³ Precio ³ Ex.Peso ³ Ex.Tmpo ³ Ex. Km ³');
+		gotoxy(x,y+2);
+		write('ÃÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄ´');
+		for k:=y+3 to y+10 do
+			begin
+				gotoxy(x,k);
+				write('³     ³             ³        ³         ³         ³        ³');
+			end;
+		gotoxy(x,y+11);
+		write('ÀÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÙ');
+		for k:=0 to 7 do
+			begin
+				gotoxy(x+2,y+3+k);
+				write_n_digits(k+1,2);
+			end;
+		textcolor(7);
+		cursor_off
+	end;
+
+
+
+
+(* Dibuja el cuadro para la consulta de facturas, pos 3,2 *)
+
+	procedure recuadro_facturas (x, y : byte);
+	var k : byte;
+	begin
+		textcolor(11);
+		gotoxy(x,y);
+		write('ÚÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄ¿');
+		gotoxy(x,y+1);
+		write('³Cod. ³Fecha     ³Servicios                            ³Subtotal³');
+		gotoxy(x,y+2);
+		write('ÃÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄ´');
+		for k:=y+3 to y+18 do
+			begin
+				gotoxy(x,k);
+				write('³     ³          ³                                     ³        ³');
+			end;
+		gotoxy(x,y+18);
+		write('ÃÄÄÄÄÄÁÄÄÄÄÂÄÄÄÄÄÁÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÂÄÁÄÄÄÄÄÄÄÄ´');
+		gotoxy(x,y+19);
+		write('³Total B.  ³00% Desc.  ³Base IVA  ³00% IVA  ³R.E.    ³Total N.  ³');
+		gotoxy(x,y+20);
+		write('ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄ´');
+		gotoxy(x,y+21);
+		write('³          ³           ³          ³         ³        ³          ³');
+		gotoxy(x,y+22);
+		write('ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÙ');
+		textcolor(7);
+		cursor_off
+	end;
+
+
+
+	procedure recuadro_factura_mensajero(x,y:byte);
+	var
+		k    : byte;
+	begin
+		textcolor(11);
+		gotoxy(x,y);
+		write('ÚÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿');
+		gotoxy(x,y+1);
+		write('³ Cod. ³                  Nombre                   ³');
+		gotoxy(x,y+2);
+		write('ÃÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´');
+		gotoxy(x,y+3);
+		write('³      ³                                           ³');
+		gotoxy(x,y+4);
+		write('ÀÄÄÄÄÄÄ´                                           ³');
+		gotoxy(x+7,y+5);
+		write('ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ');
+		gotoxy(x,y+6);
+		write('ÚÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄ¿ÚÄÄÄÄÄÄÄÄÄÄ¿');
+		gotoxy(x,y+7);
+		write('³ Tipo ³ Precio ³ N£mero ³ Ex.P. ³ Tiempo ³ Ex. km ³³ Subtotal ³');
+		gotoxy(x,wherey+1);
+		write('ÃÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄ´ÃÄÄÄÄÄÄÄÄÄÄ´');
+
+		for k:=1 to 8 do
+			begin
+				gotoxy(x,wherey+1);
+				write('³  0',k,'  ³ ');
+				write_right(ini.tfas_mensajero[k].precio,wherex+6);
+				write(' ³ x      ³       ³        ³        ³³          ³');
+			end;
+		gotoxy(x,wherey+1);
+		write('ÀÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÙÀÄÄÄÄÄÄÄÄÄÄÙ');
+		gotoxy(x,wherey+1);
+		write('                ÚÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄ¿ÉÍÍÍÍÍÍÍÍÍÍ»');
+		gotoxy(x,wherey+1);
+		write('      Importes  ³        ³       ³        ³        ³º          º Tot.');
+		gotoxy(x,wherey+1);
+		write('                ÀÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÙÈÍÍÍÍÍÍÍÍÍÍ¼');
+		textcolor(7);
+		cursor_off
+	end;
+
+
+	procedure recuadro_factura_comercial(x,y:byte);
+	begin
+		textcolor(11);
+		gotoxy(x,y);
+		write('ÚÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿');
+		gotoxy(x,y+1);
+		write('³ Cod. ³                  Nombre                   ³');
+		gotoxy(x,y+2);
+		write('ÃÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´');
+		gotoxy(x,y+3);
+		write('³      ³                                           ³');
+		gotoxy(x,y+4);
+		write('ÀÄÄÄÄÄÄ´                                           ³');
+		gotoxy(x,y+5);
+		write('       ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ');
+		gotoxy(x,wherey+1);
+		write('Albaranes Facturados');
+		gotoxy(x+40,wherey);
+		write('ÚÄÄÄÄÄÄÄÄÄÄ¿');
+		gotoxy(x+24,wherey+1);
+		write('Total Facturado ³          ³');
+		gotoxy(x+40,wherey+1);
+		write('ÀÄÄÄÄÄÄÄÄÄÄÙ');
+		gotoxy(x+40,wherey+1);
+		write('ÚÄÄÄÄÄÄÄÄÄÄ¿');
+		gotoxy(x+34,wherey+1);
+		write('Total ³          ³ (   %)');
+		gotoxy(x+40,wherey+1);
+		write('ÀÄÄÄÄÄÄÄÄÄÄÙ');
+		textcolor(7);
+		cursor_off
+	end;
+
+
+(* Tres procs. para las gr ficas de facturas *)
+
+	procedure recuadro_factura_general;
+	begin
+		textcolor(11);
+		gotoxy(x,y);
+		write('ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄ¿');
+		gotoxy(x,y+1);
+		write('³Tfno.:          ³Fecha:    /  /    ³Pagado:     ³N§:          ³');
+		gotoxy(x,y+2);
+		write('ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄ´');
+		gotoxy(x+14,y+3);
+		write('³Obvnes.:                                        ³');
+		gotoxy(x+14,y+4);
+		write('³                                                ³');
+		gotoxy(x,y+5);
+		write('ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´');
+		gotoxy(x,y+6);
+		write('³Fecha pago:    /  /     ³Tipo de pago:                        ³');
+		gotoxy(x,y+7);
+		write('ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ');
+		textcolor(lightgray);
+		cursor_off;
+	end;
+
+	procedure recuadro_pie_factura;
+	begin
+		textcolor(11);
+		gotoxy(x,y);
+		textcolor(WHITE);
+		highvideo;
+		write(' T.bruto   Des.  IVA   B.IVA     B.desc.   R.E.      T.neto');
+		gotoxy(x,y+1);
+		textcolor(11);
+		write('ÚÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÂÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄ¿ÉÍÍÍÍÍÍÍÍÍÍ»');
+		gotoxy(x,y+2);
+		write('³         ³   % ³     ³         ³         ³         ³º          º');
+		gotoxy(x,y+3);
+		write('ÀÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÁÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÙÈÍÍÍÍÍÍÍÍÍÍ¼');
+		textcolor(7);
+		cursor_off
+	end;
+
+	procedure recuadro_cabecera_albaranes;
+	begin
+		textcolor(11);
+		gotoxy(x,y);
+		writeln('Cod.    Fecha        Servicio/s                             Subtotal');
+		gotoxy(x,y+1);
+		writeln('ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ');
+		textcolor(7);
+		cursor_off;
+	end;
 
 (* Devuelve un encabezamiento de fecha y lugar *)
 	function hoy;
@@ -339,7 +715,7 @@ implementation
 			10: aux:='  Octubre  de ';
 			11: aux:=' Noviembre de ';
 			12: aux:=' Diciembre de '
-		end;
+		end;    
 		temp:=temp+aux;
 		str(fecha_sistema.year,aux);
 		temp:=temp+aux;
@@ -381,24 +757,94 @@ implementation
 					end;
 
 			1 : begin
-						gotoxy(34,11);
-						write('SOCIOS');
+						gotoxy(33,11);
+						write('CLIENTES');
 						gotoxy(31,13);
 						write('NO DISPONIBLES');
 					end;
 
 			2 : begin
 						gotoxy(34,11);
-						write('SOCIO');
+						write('CLIENTE');
 						gotoxy(32,13);
 						write('YA EXISTENTE');
 					end;
 
 			3 : begin
 						gotoxy(34,11);
-						write('SOCIO');
+						write('CLIENTE');
 						gotoxy(32,13);
 						write('INEXISTENTE');
+					end;
+
+			4 : begin
+						gotoxy(32,11);
+						write('COMERCIALES');
+						gotoxy(31,13);
+						write('NO DISPONIBLES');
+					end;
+
+			5 : begin
+						gotoxy(34,11);
+						write('COMERCIAL');
+						gotoxy(32,13);
+						write('YA EXISTENTE');
+					end;
+
+			6 : begin
+						gotoxy(34,11);
+						write('COMERCIAL');
+						gotoxy(33,13);
+						write('INEXISTENTE');
+					end;
+
+			7 : begin
+						gotoxy(32,11);
+						write('MENSAJEROS');
+						gotoxy(31,13);
+						write('NO DISPONIBLES');
+					end;
+
+			8 : begin
+						gotoxy(33,11);
+						write('MENSAJERO');
+						gotoxy(32,13);
+						write('YA EXISTENTE');
+					end;
+
+			9 : begin
+						gotoxy(33,11);
+						write('MENSAJERO');
+						gotoxy(32,13);
+						write('INEXISTENTE');
+					end;
+
+			10: begin
+						gotoxy(33,11);
+						write('ALBARANES');
+						gotoxy(31,13);
+						write('NO DISPONIBLES');
+					end;
+
+			11: begin
+						gotoxy(34,11);
+						write('ALBARAN');
+						gotoxy(32,13);
+						write('YA EXISTENTE');
+					end;
+
+			12: begin
+						gotoxy(34,11);
+						write('ALBARAN');
+						gotoxy(33,13);
+						write('INEXISTENTE');
+					end;
+
+			13: begin
+						gotoxy(32,11);
+						write('ESTADISTICAS');
+						gotoxy(31,13);
+						write('NO DISPONIBLES');
 					end;
 
 			14 : begin
@@ -422,8 +868,42 @@ implementation
 						 write('OCUPADA')
 					 end;
 
+			20 : begin
+							gotoxy(35,11);
+							write('DISCO');
+							gotoxy(32,13);
+							write('INCORRECTO');
+					 end;
 
-		end; {Case}
+			21 : begin
+							gotoxy(33,11);
+							write('FICHERO');
+							gotoxy(33,13);
+							write('COMPLETO');
+					 end;
+
+			22 : begin
+							gotoxy(33,11);
+							write('FACTURA');
+							gotoxy(33,13);
+							write('INVALIDA');
+					 end;
+
+			23 : begin
+							gotoxy(34,11);
+							write('FACTURAS');
+							gotoxy(32,13);
+							write('NO DISPONIBLES');
+					 end;
+
+			24 : begin
+							gotoxy(34,11);
+							write('FACTURA');
+							gotoxy(32,13);
+							write('NO DISPONIBLE');
+					 end;
+
+		end;
 
 		write_msg('Pulse cualquier tecla');
 		ch:=readkey;

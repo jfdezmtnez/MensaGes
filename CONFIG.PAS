@@ -8,15 +8,12 @@ interface
 
 implementation
 
-	uses windos,crt,defs,common,campstru,tfnomem,ficheros,graficos,gets  ;
-
-
-{ Lee la configuracion del programa para empezar.. }
+	uses windos,crt,defs,common,campstru,tfnomem,ficheros,graficos,gets ;
 
 	function read_cfg:boolean;
 	var f:file of t_ini;
 	begin
-		assign(f,ini.work+'ACTE.CFG');
+		assign(f,ini.work+'MENSAGES.CFG');
 		{$I-}
 		reset(f);
 		{$I+}
@@ -28,7 +25,6 @@ implementation
 			end
 			else read_cfg:=false
 	end;
-
 
 	procedure errorcillo;
 	begin
@@ -55,18 +51,49 @@ implementation
 		if read_cfg then
 			begin
 				{$I-}
-				assign(fichsocios,ini.work+'socios.dat');
-				assign(tempsocios,ini.work+'socios.tmp');
+				ini_tfnos(telefonos);
+				assign(fichfact,ini.work+'fact_h.dat');
+				assign(tempfact,ini.work+'fact_h.tmp');
 
-				assign(dni_ndx,ini.work+'codigo.ndx');
-				assign(temp_dni,ini.work+'codigo.tmp');
+				assign(fichlin,ini.work+'fact_alb.dat');
+				assign(templin,ini.work+'fact_alb.tmp');
 
-				assign(alfab_ndx,ini.work+'alfa.ndx');
-				assign(temp_alfab,ini.work+'alfa.tmp');
+				assign(fichalbs,ini.work+'albaran.dat');
+				assign(tempalbs,ini.work+'albaran.tmp');
+
+				assign(fichalbs,ini.work+'albaran.dat');
+				assign(tempalbs,ini.work+'albaran.tmp');
+
+				assign(fichclientes,ini.work+'clientes.dat');
+				assign(tempclientes,ini.work+'clientes.tmp');
+
+				assign(fichcomercia,ini.work+'dealers.dat');
+				assign(tempcomercia,ini.work+'dealers.tmp');
+
+				assign(fichmessager,ini.work+'messager.dat');
+				assign(tempmessager,ini.work+'messager.tmp');
+
+				assign(cod_ndx,ini.work+'codigo.ndx');
+				assign(temp_cod_ndx,ini.work+'codigo.tmp');
+
+				assign(fec_ndx,ini.work+'fecha.ndx');
+				assign(temp_fec_ndx,ini.work+'fecha.tmp');
+
+				assign(fact_ndx,ini.work+'fact.ndx');
+				assign(temp_fact_ndx,ini.work+'fact.tmp');
+
+				assign(cod_dsk,ini.work+'albaran.dsk');
+				assign(temp_cod_dsk,ini.work+'dsk.tmp');
 
 				{$I+}
 
-				max_socios:=scan_socios_f;
+
+				max_clientes:=scan_client_f(telefonos);
+				max_comerciales:=scan_dealer_f;
+				max_mensajeros:=scan_messager_f;
+				max_albaranes:=scan_dispatch_f;
+				max_facturas:=scan_facturas_f;
+				max_lineas_alb:=scan_lineas_alb_f;
 			end;
 		decrease(fecha_sistema);
 		ini.last_fact_month:=transform(fecha_sistema);
@@ -76,11 +103,10 @@ implementation
 	end;
 
 
-{   Hay que rehacerlo por completo.... No vale casi nada de lo que hab¡a..
-
 	procedure configure;
 	var
 		p,f,i   : pnodo_dato;
+		cliente : t_cliente;
 		fich    : FILE of t_ini;
 		lector  : aga;
 		faga    : file of aga;
@@ -88,7 +114,7 @@ implementation
 		op,k,cte: byte;
 		v,j     : boolean;
 		c       : char;
-
+		
 	begin
 		v:=false;
 		j:=false;
@@ -246,4 +272,3 @@ implementation
 
 
 end.
-}

@@ -6,65 +6,63 @@ uses crt,windos,defs;
 
 type
 
-	str_3=string[3]; { este string contiene la tecla pulsada }
+	 str_3=string[3]; { este string contiene la tecla pulsada }
 
-	t_estado=record { registro de teclas especiales pulsadas }
+	 t_estado=record { registro de teclas especiales pulsadas }
 
-	{ bits por orden, 7 6 5 4 1 0 7 3 2 1 0 }
+		{ bits por orden, 7 6 5 4 1 0 7 3 2 1 0 }
 
-					 insert:boolean;
-					 bloqmays:boolean;
-					 bloqnum:boolean;
-					 bloqdespl:boolean;
-					 lshift:boolean;
-					 rshift:boolean;
-					 petsis:boolean;
-					 ralt:boolean;
-					 rcontrol:boolean;
-					 lalt:boolean;
-					 lcontrol:boolean;
+						 insert:boolean;
+						 bloqmays:boolean;
+						 bloqnum:boolean;
+						 bloqdespl:boolean;
+						 lshift:boolean;
+						 rshift:boolean;
+						 petsis:boolean;
+						 ralt:boolean;
+						 rcontrol:boolean;
+						 lalt:boolean;
+						 lcontrol:boolean;
 
-				 end;
+					 end;
 
-{	 procedure dar_alta_albaran (fesha:t_date; codigo:t_codigo);
+	 procedure dar_alta_albaran (fesha:t_date; codigo:t_codigo);
 	 function comprueba_albaran (cod:t_codigo; fi:str_11):boolean;
-}
-	function trim (cad:string):string;
-{	function trim_real (cad:string):string;
-}
 
-	function get_key (var p_ascii:char; { codigo ascii }
-			 var p_scancode:byte; { codigo de exploracion }
-			 var p_funcion:byte; { tecla de funcion pulsada }
-			 var p_estado:t_estado; { estado bloqmays etc. }
-			 var p_teclas:str_3):boolean; {tecla pulsada tab etc. }
+	 function trim (cad:string):string;
+	 function trim_real (cad:string):string;
 
-	procedure dellete (var str:string; pos,longitud:byte);
-	function get_field (VAR campo:t_nodo_dato):byte;
-	procedure put_string (campo:t_nodo_dato; modo:byte);
-	procedure inserta (var str:string; c:char; pos,longitud:byte);
-	function si_no (predefinida:char):boolean;
-{	function transform (fecha:t_date):str_11;
-}	procedure put_campo (campo:t_nodo_dato; fore:byte);
-	procedure put_inverse(inix,iniy,finx,finy:byte);
-	procedure cursor_off;
-	procedure cursor_solid;
-	procedure cursor_line;
-	function str_to_long(cad:string):longint;
-	procedure increase(var fecha : t_date);
-	procedure decrease(var fecha : t_date);
-	function fecha_numero(d,m,a:integer):longint;
-	procedure cad_fecha(cad:string; var d,m,a:integer);
-	procedure save_cfg;
-	procedure ordena_alfab_ndx;
-	procedure ordena_dni_ndx;
+
+	 function get_key (var p_ascii:char; { codigo ascii }
+				 var p_scancode:byte; { codigo de exploracion }
+				 var p_funcion:byte; { tecla de funcion pulsada }
+				 var p_estado:t_estado; { estado bloqmays etc. }
+				 var p_teclas:str_3):boolean; {tecla pulsada tab etc. }
+
+	 procedure dellete (var str:string; pos,longitud:byte);
+	 function get_field (VAR campo:t_nodo_dato):byte;
+	 procedure put_string (campo:t_nodo_dato; modo:byte);
+	 procedure inserta (var str:string; c:char; pos,longitud:byte);
+	 function si_no (predefinida:char):boolean;
+	 function transform (fecha:t_date):str_11;
+	 procedure put_campo (campo:t_nodo_dato; fore:byte);
+	 procedure put_inverse(inix,iniy,finx,finy:byte);
+	 procedure cursor_off;
+	 procedure cursor_solid;
+	 procedure cursor_line;
+	 function str_to_long(cad:string):longint;
+	 procedure increase(var fecha : t_date);
+	 procedure decrease(var fecha : t_date);
+    function fecha_numero(d,m,a:integer):longint;
+    procedure cad_fecha(cad:string; var d,m,a:integer);
+	 procedure save_cfg;
+    procedure ordena_fecha_ndx;
+    procedure ordena_cod_ndx;
 
 
 implementation
 
 
-
-{ Incrementa una t_date en un mes.. o a¤o si procede..}
 procedure increase(var fecha : t_date);
 begin
 	if fecha.month=12 then
@@ -75,9 +73,6 @@ begin
 		else inc(fecha.month)
 end;
 
-
-
-{ Decrementa una t_date en un mes.. }
 procedure decrease(var fecha : t_date);
 begin
 	if fecha.month=1 then
@@ -89,19 +84,21 @@ begin
 end;
 
 
-
-{ Pone en Inverso el fondo de un recuadro de la pantalla }
 procedure put_inverse;
 var
+	screen_output : videomatrix absolute($B800):$0000;
 	i,j : word;
+	{a : word;}
 begin
+	{a:=1;}
 	while (iniy<=finy) do
 		begin
 			i:=2*inix+160*iniy-161;
 			j:=2*finx+160*iniy-161;
 			while (i<=j) do
 				begin
-					if (i mod 2)=0 then pantalla[i]:=27;
+					if (i mod 2)=0 then screen_output[i]:=27;
+					{inc(a);}
 					inc(i);
 				end;
 			inc(iniy)
@@ -109,7 +106,6 @@ begin
 end;
 
 
-{ Convierte un string en longint.. }
 function str_to_long;
 var
 	 total:longint;
@@ -144,9 +140,6 @@ end;
 
 
 
-
-{ Muy compleja (Te alabamos Fran..). Recoje una tecla pulsada por pantalla
-Teniendo en cuenta el ESTADO DEL TECLADO (Shifts., Alts., et cetera..}
 function get_key;
 
 begin
@@ -258,8 +251,6 @@ begin
 end;
 
 
-(* Ya no nos hace falta.. :-((
-
 { con un mes y un a¤o devuelve el nombre del fichero de albaranes
 correspondiente }
 
@@ -289,11 +280,11 @@ begin
 		 transform:=fichero;
 end;
 
-*)
 
 
 
-{ Coloca un campo de datos sobre su recuadro en pantalla }
+
+
 procedure put_campo;
 var
 	 long_linea:byte;
@@ -313,27 +304,23 @@ begin
 end;
 
 
-
-{ Quita los caRATEres no num‚ricos de un string..}
 function trim;
 var
 	 res:string;
 	 i:byte;
+
 begin
 
-	res:='';
-	for i:=1 to length(cad) do
-	 begin
-		if cad[i] in ['0'..'9'] then res:=res+cad[i];
-	 end;
+		 res:='';
+		 for i:=1 to length(cad) do
+		 begin
+					if cad[i] in ['0'..'9'] then res:=res+cad[i];
+		 end;
 
-	trim:=res;
+		 trim:=res;
 end;
 
 
-(* Creo que nos no va a valer...
-
-{ Lo mismo con n£meros decimales tambi‚n }
 function trim_real;
 var
 	 res:string;
@@ -350,12 +337,7 @@ begin
 		 trim_real:=res;
 end;
 
-*)
 
-
-
-{ Borra el cursor de la pantalla. Pro alguna raz¢n no lo deja en ese estado,
-As¡ que cuando volvemos a escribir algo el cursor se torna visible otra vez}
 procedure cursor_off;
 begin
 		 regs.ah:=$02;
@@ -366,7 +348,6 @@ begin
 end;
 
 
-{ Pone el cursor tocho ... }
 procedure cursor_solid;
 begin
 		 regs.ah:=$01;
@@ -375,8 +356,6 @@ begin
 		 intr($10,regs);
 end;
 
-
-{ Cursor t¡pico de toda la vida..}
 procedure cursor_line;
 begin
 		 regs.ah:=$01;
@@ -386,7 +365,7 @@ begin
 end;
 
 
-{ Escribe una cadena en un campo con los atributos de color que se le pasan.... }
+
 procedure put_string;
 var
 	 long_linea:byte;
@@ -419,48 +398,44 @@ begin
 end;
 
 
-
-{ Borra caracteres indeseados..}
 procedure dellete;
 var
 	 tmp1,tmp2:string;
 begin
 
-	case longitud of
-		1:str:='';
-		else
-			begin
-				tmp1:=copy(str,1,pos-1);
-				tmp2:=copy(str,pos+1,longitud-pos);
-				str:='';
-				str:=tmp1+tmp2+' '
-			end
-		end
+		 case longitud of
+					1:str:='';
+					else
+					begin
+							 tmp1:=copy(str,1,pos-1);
+							 tmp2:=copy(str,pos+1,longitud-pos);
+							 str:='';
+							 str:=tmp1+tmp2+' ';
+					end;
+		 end;
 end;
 
 
 
-{ Inserta un string dentro de otro..}
+
 procedure inserta;
 var
 	 tmp1,tmp2:string;
 begin
 
-	case longitud of
-		1:str:=c;
-			else begin
-				tmp1:=copy(str,1,pos-1);
-				tmp2:=copy(str,pos,longitud-pos);
-				str:='';
-				str:=tmp1+c+tmp2
-			end
-	end
+		 case longitud of
+					1:str:=c;
+					else
+					begin
+							 tmp1:=copy(str,1,pos-1);
+							 tmp2:=copy(str,pos,longitud-pos);
+							 str:='';
+							 str:=tmp1+c+tmp2;
+					end;
+		 end;
 end;
 
 
-
-
-{ Coge un campo de pantalla (Te alabamos Fran :-000}
 function get_field;
 var
 	 x,y:byte;
@@ -555,8 +530,6 @@ begin
 end;
 
 
-
-{  Esta funcioncilla solo es para las decisiones tipo "S/N" }
 function si_no;
 var
 	 c      : char;
@@ -573,7 +546,7 @@ begin
 		if teclas='ret' then
 			begin
 				salir:=true;
-				if predefinida='S' then r:=1
+				if predefinida='S' then r:=1 
 					else r:=0
 			end
 			else if teclas='' then
@@ -598,7 +571,7 @@ begin
 		else si_no:=false;
 end;
 
-(* NO NOS HACEN FALTA ESTOS:::::
+
 procedure dar_alta_albaran;
 var
 	valor:byte;
@@ -635,24 +608,19 @@ begin
 			 comprueba_albaran:=true;
 		end;}
 end;
-*)
 
-
-
-{pasa a longint un fecha expresada en dia mes y a¤o}
 function fecha_numero;
 var ty:longint;
 begin
-	 ty:=a;
-	 ty:=ty*100000;
-	 ty:=ty div 10;
-	 m:=m*100;
+     ty:=a;
+     ty:=ty*100000;
+     ty:=ty div 10;
+     m:=m*100;
 
-	 fecha_numero:=ty+m+d;
+     fecha_numero:=ty+m+d;
 end;
 
 
-{ Mete en una t_date un string }
 procedure cad_fecha;
 var
 
@@ -661,35 +629,34 @@ var
    cdia,cmes,canho:string;
    codig:integer;
 begin
-	 barra:=0;
-	 ultimo:=1;
-		 for i:=1 to length(cad) do
-		 begin
-			  if cad[i]='.' then
-			  begin
-				   ca[barra+1]:=copy(cad,ultimo,i-ultimo);
-				   ultimo:=i+1;
-				   inc(barra);
-			  end;
-		 end;
+     barra:=0;
+     ultimo:=1;
+         for i:=1 to length(cad) do
+         begin
+              if cad[i]='.' then
+              begin
+                   ca[barra+1]:=copy(cad,ultimo,i-ultimo);
+                   ultimo:=i+1;
+                   inc(barra);
+              end;
+         end;
 
-		 ca[barra+1]:=copy(cad,ultimo,(length(cad)+1)-ultimo);
+         ca[barra+1]:=copy(cad,ultimo,(length(cad)+1)-ultimo);
 
-		 cdia:=ca[1];
-		 cmes:=ca[2];
-		 canho:=trim(ca[3]);
+         cdia:=ca[1];
+         cmes:=ca[2];
+         canho:=trim(ca[3]);
 
-		 val(cdia,d,codig);
-		 val(cmes,m,codig);
-		 val(canho,a,codig);
+         val(cdia,d,codig);
+         val(cmes,m,codig);
+         val(canho,a,codig);
 end;
 
 
-{ Salva la configuraci¢n. Hay que hacerlo a menudo..}
 	procedure save_cfg;
 	var f:file of t_ini;
 	begin
-		assign(f,ini.work+'ACTE.CFG');
+		assign(f,ini.work+'MENSAGES.CFG');
 		{$I-}
 		rewrite(f);
 		{$I+}
@@ -701,88 +668,87 @@ end;
 	end;
 
 
-
-{ Aqui ordenamos el fichero de DNIïs}
-procedure ordena_dni_ndx;
-const max=1700;
+procedure ordena_cod_ndx;
+const max=1300;
 var
-   cont   : word;
-   indice : t_dni_ndx;
-   indices: array [1..max] of t_dni_ndx;
-   tam    : word;
-   i,j    : word;
-   temp   : t_dni_ndx;
+   f_index:file of t_index;
+   cont:word;
+   indice:t_index;
+   indices:array [1..max] of t_index;
+   tam:word;
+   i,j:word;
+   temp:t_index;
 begin
-	reset(dni_ndx); {abre para leer codigo.ndx}
-	cont:=1;
-	while not(eof(dni_ndx)) do
-		begin
-			read(dni_ndx,indice);
-			indices[cont]:=indice; {Pasa todos los ¡ndices a memoria}
-			inc(cont);
-		end;
+     assign(f_index,ini.work+'codigo.ndx');
+	  reset(f_index); {abre para leer codigo.ndx}
+	  cont:=1;
+	  while not(eof(f_index)) do
+	  begin
+				read(f_index,indice);
+				indices[cont]:=indice;
+				inc(cont);
+	  end;
 
-	tam:=cont-1;
+	  { ordena el array en memoria }
 
-{ ordena el array en memoria (Bubble) }
+	  for i:=1 to tam do
+			  for j:=1 to tam-1 do
+					  if indices[j].numero>indices[j+1].numero then
+							begin
+									  temp:=indices[j];
+									  indices[j]:=indices[j+1];
+									  indices[j+1]:=temp;
+							end;
 
-	for i:=1 to tam do
-		for j:=1 to tam-1 do
-			if indices[j].dni>indices[j+1].dni then
-				begin
-					temp:=indices[j];
-					indices[j]:=indices[j+1];
-					indices[j+1]:=temp;
-				end;
+	  { reescribe albaran.ndx con el array }
 
-	  { reescribe codigo.ndx con el array }
-
-	  rewrite(dni_ndx); {abre para escribir codigo.ndx}
-	  for i:=1 to max_socios do write(dni_ndx,indices[i]);
-	  close(dni_ndx); {cierra codigo.ndx}
+	  rewrite(f_index); {abre para escribir codigo.ndx}
+	  for i:=1 to tam do write(f_index,indices[i]);
+	  close(f_index); {cierra codigo.ndx}
 end;
 
 
 
 
 
-procedure ordena_alfab_ndx;
-const max=1700;
+procedure ordena_fecha_ndx;
+const max=1300;
 var
-   cont     : word;
-   indice2  : t_alfab_ndx;
-   indices2 : array [1..max] of t_alfab_ndx;
-   tam      : word;
-   i,j      : word;
-   temp2    : t_alfab_ndx;
+   fecha_index:file of t_index2;
+   cont:word;
+   indice2:t_index2;
+   indices2:array [1..max] of t_index2;
+   tam:word;
+   i,j:word;
+   temp2:t_index2;
 begin
-	cont:=1;
-	reset(alfab_ndx); {abre para leer alfa.ndx}
+     cont:=1;
+     assign(fecha_index,ini.work+'fecha.ndx');
+     reset(fecha_index); {abre para leer fecha.ndx}
 
-	while not(eof(alfab_ndx)) do
-		begin
-			read(alfab_ndx,indice2);
-			indices2[cont]:=indice2;
-		{ indices2[cont].nombre:=indice2.nombre;
-		  indices2[cont].pos:=indice2.pos;
-}			inc(cont);
-		 end;
+     while not(eof(fecha_index)) do
+     begin
+          read(fecha_index,indice2);
+          indices2[cont].fecha:=indice2.fecha;
+          indices2[cont].pos:=indice2.pos;
+          inc(cont);
+     end;
 
-	tam:=cont-1;
+     tam:=cont-1;
 
-	for i:=1 to tam do
-		for j:=1 to tam-1 do
-			if indices2[j].nombre>indices2[j+1].nombre then
-				begin
-					temp2:=indices2[j];
-					indices2[j]:=indices2[j+1];
-					indices2[j+1]:=temp2;
-				end;
+     for i:=1 to tam do
+         for j:=1 to tam-1 do
+             if indices2[j].fecha>indices2[j+1].fecha then
+                begin
+                     temp2:=indices2[j];
+                     indices2[j]:=indices2[j+1];
+                     indices2[j+1]:=temp2;
+                end;
 
 
-	rewrite(alfab_ndx); {abre para escribir ALFA.NDX}
-	for i:=1 to tam do write(alfab_ndx,indices2[i]);
-	close(alfab_ndx); {cierra ALFA.NDX}
+     rewrite(fecha_index); {abre para escribir FECHA.NDX}
+     for i:=1 to tam do write(fecha_index,indices2[i]);
+     close(fecha_index); {cierra FECHA.NDX}
 end;
 
 

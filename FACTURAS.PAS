@@ -2,12 +2,12 @@ unit facturas;
 
 interface
 
-	uses crt,defs,common,campstru,graficos,ficheros,puts,gets;
+	uses crt,defs,common,campstru,graficos,ficheros,puts,gets,tfnomem,formulas;
 
 
 	procedure consultar_factura;
-	procedure modif_factura;
-	procedure borrar_factura;
+{	procedure modif_factura;
+}	procedure borrar_factura;
 
 
 implementation
@@ -25,6 +25,17 @@ implementation
 		 paginas:byte; { numero de paginas, resultado de max_elem div ancho }
 		 actual_page:byte; { numero actual de pagina }
 	 end;
+
+
+
+{ Devuelve un puntero seg£n una posici¢n relativa en la lista }
+  function lugar(var inicio:listalbs;pox:byte):listalbs;
+  var aux:listalbs;
+  begin
+		aux:=inicio;
+		while pox>1 do begin	aux:=aux^.sig; dec(pox) end;
+		lugar:=aux;
+  end;
 
 
 { Calcula los valores de info en un momento determinado }
@@ -59,60 +70,41 @@ implementation
 
 
 { Escribe en pantalla los albaranes de una factura de acuerdo con info }
-	procedure disp(var lista:t_lista; var info:t_info);
+	procedure disp(var info:t_info; var inig:listalbs);
 	var y:byte;
+		aux:listalbs;
+		n:byte;
 	begin
-		gotoxy(3,5);
-		y:=3;
-		for n:=info.liminf to info.limsup do
-		begin
-			if n<=info.max_elem then
-			begin
-				gotoxy(10,y);
-				write(lista[n],'      ');
-				gotoxy(2,y);
-				write(n,'     ');
-			end
-			else
-			begin
-				gotoxy(10,y);
-				write('         ');
-				gotoxy(2,y);
-				write('        ');
-			end;
-			if n=info.liminf+info.pos_en_ancho-1 then
-			begin
-				textcolor(WHITE);
-				textbackground(BLUE);
-				gotoxy(10,y);
-				write(lista[n],'  ');
-				gotoxy(2,y);
-				write(n,'     ');
-				textcolor(WHITE);
-				textbackground(BLACK);
-			end;
-			inc(y);
-		end;
-
-
-		{ si tal se puede sustituir el for por un while con una condicion
-		de salida si ocurre lo de n>max_elem
-		}
-
+		y:=16;
 		with info do
 		begin
-			gotoxy(40,5);
-			write('P ginas: ',paginas);
-			gotoxy(40,3);
-			write('Elementos: ',max_elem);
-			gotoxy(40,7);
-			write('Elem. : ',elem_actual,'   ');
-			gotoxy(40,9);
-			write('Lim Inf:',liminf);
-			gotoxy(40,11);
-			write('Lim Sup:',limsup);
+			for n:=(elem_actual-pos_en_ancho)+1 to elem_actual+(ancho-pos_en_ancho) do
+			begin
+				if n=elem_actual then
+				begin
+					aux:=lugar(inig,n);
+					gotoxy(3,y);
+					write('                                                                      ');
+					put_linea_albaran(3,y,aux,true);
+				end
+				else
+				begin
+					if n<=max_elem then
+					begin
+						aux:=lugar(inig,n);
+						gotoxy(3,y);
+						write('                                                                      ');
+						put_linea_albaran(3,y,aux,false);
+					end
+					else
+					begin
+						gotoxy(3,y);
+						write('                                                                      ');
+					end;
+				end;
+				inc(y);
+			end;
 		end;
-
 
 	end;
 
@@ -123,8 +115,9 @@ implementation
 
 { Esta funci¢n se encargar  de coger los datos de un albar n. Solo es llamada
   por add_albaran y edit_albaran }
-  function get_albaran_lista(var alb:listalbs;var aalbaran:t_albaran;
-										num:t_codigo; c:t_cliente; var i:byte):boolean;
+  function get_albaran_lista(var alb:listalbs; var aalbaran:t_albaran;
+										num:t_codigo; c:t_cliente; var i:byte;
+										hhead:t_factura_head):boolean;
   var
 	  op,pos   : word;
 	  yes      : boolean;
@@ -134,13 +127,15 @@ implementation
 
 	  yes:=false;
 
-		lowbar('Modificar factura');
+	  lowbar('Modificar factura');
 	  recuadro_albaran(3,3);
 
 	  repeat
 		  op:=get_albaran(aalbaran,3,3);
 		  if op<>0 then yes:=true;
 		until yes;
+
+	  aalbaran.telefono:=hhead.telefono;
 
 	  pos:=busca_tfno(telefonos,aalbaran.telefono,max_clientes);
 	  if pos=0 then
@@ -184,7 +179,7 @@ implementation
 
 
 	{ Se carga un albar n de una faTura }
-	procedure delete_albaran_fact(var inicial,alb:listalbs;v:boolean);
+	procedure delete_albaran_fact(var inicial,alb:listalbs;v:boolean;var info:t_info);
 	var
 		i        : byte;
 		op,pos   : word;
@@ -212,9 +207,9 @@ implementation
 
 			  if op<>0 then
 				  begin
-					  gettext(1,2,24,80,buffer);
-					  blackout(1,2,24,80);
-						recuadro_albaran(3,3);
+					  gettext(1,2,80,24,buffer);
+					  blackout(1,2,80,24);
+					  recuadro_albaran(3,3);
 					  put_albaran(aalbaran,3,3);
 					  put_casilla(aalbaran,1,3,10);
 					  write_msg(' Eliminar albar n (s/N)');
@@ -222,6 +217,12 @@ implementation
 					  if yes then
 						  begin
 							  write_msg(' Eliminando ....');
+
+							  if info.elem_actual=info.max_elem then dec(info.elem_actual)
+								else if info.elem_actual=1 then inc(info.elem_actual);
+							  dec(info.max_elem);
+
+
 							  if i=0 then
 								begin
 									{$I-}
@@ -230,9 +231,9 @@ implementation
 									if ioresult=0 then    { Esto es para cambiar el flag }
 										begin
 											repeat
-												read(fec_index,fec);
+												read(fec_ndx,fec); (* antes habia un fec_index, ¨estara bien? *)
 											until fec.pos=pos;
-											fec.facturado=false;
+											fec.facturado:=false;
 											seek(fec_ndx,filepos(fec_ndx)-1);
 											write(fec_ndx,fec);
 											close(fec_ndx)
@@ -255,38 +256,27 @@ implementation
 									end
 
 
-	(****************************************************************************)
+(****************************************************************************)
 
-								{ ¨Cu ndo escribo la faTura en disco? }
+					{ ¨Cu ndo escribo la faTura en disco? }
 
-								{ ¨Y los ¡ndices? }
+					{ ¨Y los ¡ndices? }
 
-							  { ¨A donde vamos? }
-
-							  { ¨De donde venimos? }
-
-							  { Y, sobre todo, ¨Encontrar‚ inquilino alg£n d¡a? }
-							  {24-7-96}
-  (****************************************************************************)
+(****************************************************************************)
 
 							end;
-					  puttext(1,2,24,80,buffer);
+					  puttext(1,2,80,24,buffer);
 				  end
 				  else error(12)
 		  end
   end;
 
 
-{ Devuelve un puntero seg£n una posici¢n relativa en la lista }
-  function lugar(var inicio:listalbs,pox:byte;):listalbs;
-  begin
-		lugar:=inicio;
-		while pox>1 do begin	lugar:=lugar^.sig; dec(pox) end;
-  end;
 
 
   { A¤ade un albar n a la lista de la faTura }
-  procedure add_albaran(var inicio:listalbs;var pox:byte;code:t_codigo);
+  procedure add_albaran(var inicio:listalbs; code:t_codigo;
+								var jhead:t_factura_head; var info:t_info);
   var
 	  i        : byte;
 	  c        : t_cliente;
@@ -294,17 +284,24 @@ implementation
 	  yes,fin  : boolean;
 	  aux,alb  : listalbs;
 	  campo    : t_nodo_dato;
-		buffer   : videomatrix;
-		fecia    : t_index2;
-		codigo   : t_codigo;
-		aalbaran : t_albaran;
+	  buffer   : videomatrix;
+	  fecia    : t_index2;
+	  codigo   : t_codigo;
+	  aalbaran : t_albaran;
 	begin
-		pos:=busca_tfno(telefonos,inicio^.telefono,max_clientes);
+
+
+
+		(* **** IVAN !!!!!!!!! **** *)
+
+		(* No hay telefono en las lineas de albaranes *)
+
+		pos:=busca_tfno(telefonos,jhead.telefono,max_clientes);
 		if pos<>0 then
 			begin
 				yes:=true;                { Es muy parecida a new_albaran }
 				fin:=false;
-				alb:=lugar(inicio,pox);
+				alb:=lugar(inicio,info.elem_actual);
 				ini_albaran(aalbaran);
 
 				busca_cliente_f(c,pos);
@@ -348,18 +345,19 @@ implementation
 				if not fin then
 					begin
 						aalbaran.codigo  :=codigo;
-						aalbaran.telefono:=inicio^.telefono;
+						aalbaran.telefono:=jhead.telefono;
 						lowbar('Modificar factura');
 						blackout(3,3,15,3);
 						new(aux); { Nuevo nodo}
 						aux^.sig:=nil;
-						if get_albaran_lista(aux,aalbaran,code,c,i) then
+						if get_albaran_lista(aux,aalbaran,code,c,i,jhead) then
 							begin
 								write_msg(' A¤adiendo ...');
 								albaran_borrado:=true;
 								ins_albaran_f(aalbaran,max_albaranes);
 								actualiza_cod_index(aalbaran.codigo);
 								actualiza_fec_index(aalbaran.fecha);
+								inc(info.max_elem);
 
 						{ Esto es para cambiar el estado del flag }
 								{$I-}
@@ -369,7 +367,7 @@ implementation
 									begin
 										repeat
 											read(fec_ndx,fecia);         (*************************)
-										until fecia.pos:=max_albaranes; {Comprobar esta condici¢n}
+										until fecia.pos=max_albaranes; {Comprobar esta condici¢n}
 										fecia.facturado:=true;				 (*************************)
 										seek(fec_ndx,filepos(fec_ndx)-1);
 										write(fec_ndx,fecia);
@@ -403,7 +401,7 @@ implementation
 
 
 	{ Modifica un albar n de la faTura }
-	procedure edit_albaran(var inicio:listalbs; var pox:byte; code:t_codigo;);
+	procedure edit_albaran(var inicio:listalbs; var pox:byte; code:t_codigo; var jhead:t_factura_head);
 	var
 		c        : t_cliente;
 		op,pos   : word;
@@ -411,11 +409,12 @@ implementation
 		aux,alb  : listalbs;
 		campo    : t_nodo_dato;
 		buffer   : videomatrix;
-		codigo   : t_codigo;
+{		codigo   : t_codigo;  }
 		aalbaran : t_albaran;
+		posv:word;
 	begin
-		pos:=busca_tfno(inicio^.telefono);
-		if pos<>0 then
+		posv:=busca_tfno(telefonos,jhead.telefono,max_clientes);
+		if posv<>0 then
 		begin
 			yes:=true;
 			fin:=false;
@@ -434,29 +433,32 @@ implementation
 			if yes then
 				begin
 
-					busca_cliente_f(c,pos);
 
+					busca_cliente_f(c,posv);
+					ini_albaran(aalbaran);
+					posv:=busca_albaran_f(aalbaran,alb^.codigo,i,pos);
 					lowbar('Modificar factura');
 					gettext(1,2,80,24,buffer);
 					blackout(1,2,80,24);
-					if get_albaran_lista(alb,aalbaran,code,c,i) then
+					if get_albaran_lista(alb,aalbaran,code,c,i,jhead) then
 						begin
 							write_msg(' Actualizando.....');
-							write_msg('Un momento...');
 							if i=0 then
 								begin
 									albaran_borrado:=true;
 									desactiva_albaran(pos);
-									borra_cod_index(codigo);
+									borra_cod_index(aalbaran.codigo);
 									borra_fec_index(aalbaran.fecha,pos);
 								end
-								else borra_cod_dsk(codigo);
+								else borra_cod_dsk(aalbaran.codigo);
 
 							ins_albaran_f(aalbaran,max_albaranes);
-							actualiza_cod_index(codigo);
+							actualiza_cod_index(alb^.codigo);
 							actualiza_fec_index(aalbaran.fecha);
-
-						end;
+{
+							pos:=busca_index_cod(alb^.codigo,i);
+							posv:=busca_albaran_f(aalbaran,alb^.codigo,i,pos);
+}						end;
 					puttext(1,2,80,24,buffer)
 				end
 				else error(12)
@@ -476,27 +478,31 @@ end;
 
 	procedure consultar_factura;
 	var
-		ahead:t_factura_head;
-		num_pagina:byte;
-		paginas:byte;
-		v,j,ans:boolean;
-		tecla:boolean;
-		limsup,liminf:byte;
-		campo:t_nodo_dato;
-		op,pos:word;
-		inic,puntx:listalbs;
-		i  : byte;
-		c,t:char;
-		codigo:t_codigo;
-		ofset:byte;
-		nalbs:word;
-		resto:byte;
-		c_ascii:char;
+		ahead         : t_factura_head;
+		num_pagina    : byte;
+		paginas       : byte;
+		v,j,ans       : boolean;
+		tecla         : boolean;
+		limsup,liminf : byte;
+		campo         : t_nodo_dato;
+		op,pos        : word;
+		inic,puntx    : listalbs;
+		i             : byte;
+		c,t           : char;
+		codigo        : t_codigo;
+		ofset         : byte;
+		nalbs         : word;
+		resto         : byte;
+		c_ascii       : char;
+
 		c_scancode,c_funcion:byte;
-		c_estado:t_estado;
-		c_teclas:str_3;
+
+		infog         : t_info;
+		c_estado      : t_estado;
+		c_teclas      : str_3;
+		ccli          : t_cliente;
+
 	begin
-		crea_factura_ndx;
 			swap_menu(25,5,26);
 			repeat
 				ini_factura(ahead);
@@ -564,79 +570,44 @@ end;
 								recuadro_cabecera_albaranes(3,14);
 								puntx:=inic;
 								write_msg('Cursores Arr./Aba. para ver albaranes. ESC - Salir');
-								liminf:=1;
-								paginas:=nalbs div 8;
-								resto:=nalbs mod 8;
-								if (paginas=1) and ( resto=0) then paginas:=0;
-								num_pagina:=0;
-								if paginas=0 then limsup:=nalbs else
-									limsup:=8;
-								put_factura_general_albaranes(puntx,liminf,limsup,3,16);
-								if paginas<>0 then
+								with infog do
+								begin
+									max_elem:=nalbs;
+									ancho:=8;
+									liminf:=1;
+									paginas:=nalbs div 8;
+									resto:=nalbs mod 8;
+									if (paginas=1) and ( resto=0) then paginas:=0;
+									actual_page:=0;
+									if paginas=0 then limsup:=nalbs else
+										limsup:=8;
+									put_factura_general_albaranes(puntx,liminf,limsup,3,16);
+									puntx:=inic;
+									put_linea_albaran(3,16,puntx,true);
+									elem_actual:=1;
+									pos_en_ancho:=1;
+								end;
+
+								if infog.paginas<>0 then
 								repeat
-
-
-								(* ver las lineas de albaranes mediante pgup y pgdw,
-								pero no funciona del todo bien *)
-
-										{
-										dec(paginas);
-										repeat until get_key(c_ascii,c_scancode,c_funcion,c_estado,c_teclas);
-										if (c_teclas<>'') then
-										begin
-											ofset:=7;
-											if c_teclas='pup' then
-												if num_pagina>0 then	dec(num_pagina);
-											if c_teclas='pdw' then
-											begin
-												if num_pagina<=paginas then inc(num_pagina)
-												else
-												begin
-													num_pagina:=paginas;
-													ofset:=resto-1;
-												end;
-												liminf:=num_pagina*8+1;
-												limsup:=liminf+ofset;
-												blackout(3,16,79,23);
-												put_factura_general_albaranes(puntx,liminf,limsup,3,16);
-											end;
-										end;
-										}
-
-(* el trozo de codigo en comentario pertenece a una forma de ver
-las lineas de albaran mediante los cursores *)
-
 
 									repeat until get_key(c_ascii,c_scancode,c_funcion,c_estado,c_teclas);
 									if (c_teclas<>'') then
 									begin
 										if c_teclas='dow' then
 										begin
-											inc(limsup);
-											inc(liminf);
-											if limsup>nalbs then
-											begin
-												dec(limsup);
-												dec(liminf);
-											end;
-											blackout(3,16,79,23);
-											put_factura_general_albaranes(puntx,liminf,limsup,3,16);
+											infog.tipo_desp:=2;
+											engine(infog);
+											disp(infog,inic);
 										end;
 										if c_teclas='up' then
 										begin
-											dec(limsup);
-											dec(liminf);
-											if liminf<1 then
-											begin
-												inc(limsup);
-												inc(liminf);
-											end;
-											blackout(3,16,79,23);
-											put_factura_general_albaranes(puntx,liminf,limsup,3,16);
+											infog.tipo_desp:=1;
+											engine(infog);
+											disp(infog,inic);
 										end;
 									end;
-
-
+									puntx:=lugar(inic,infog.elem_actual);
 
 								until c_teclas='esc'
 								else
@@ -647,15 +618,20 @@ las lineas de albaran mediante los cursores *)
 								{put_inverse(3,16,71,16);}
 							end
 							else error(12);
+{
+						write_msg(' ¨Imprimir Copia? (s/N)');
+						ans:=si_no('N');
+						if ans then print_fact_cliente(
+}
 						write_msg(' Ver otra factura (S/n)');
-						ans:=si_no('S')
+						ans:=si_no('S');
+						borra_lista_facturas(inic);
 					end;
 			until (j or not ans);
-			borra_lista_facturas(inic);
 
 	end;
 
-
+(*
 
 	procedure modif_factura;
 	var
@@ -682,11 +658,11 @@ las lineas de albaran mediante los cursores *)
 		auxpos:byte;
 		c_estado:t_estado;
 		num_albaran:word;
+		infog:t_info;
 		c_teclas:str_3;
 		ypos:byte;
 		ya_estaba:boolean;
 	begin
-		crea_factura_ndx;
 			swap_menu(25,5,26);
 			repeat
 				ini_factura(ahead);
@@ -762,21 +738,25 @@ las lineas de albaran mediante los cursores *)
 								begin
 									recuadro_cabecera_albaranes(3,14);
 									write_msg('F1 - Ayuda para edici¢n de albaranes');
-									liminf:=1;
-									paginas:=nalbs div 8;
-									resto:=nalbs mod 8;
-									if (paginas=1) and ( resto=0) then paginas:=0;
-									num_pagina:=0;
-									if paginas=0 then limsup:=nalbs else
-										limsup:=8;
-									put_factura_general_albaranes(puntx,liminf,limsup,3,16);
-									p_alb:=inic;
-									put_linea_albaran(3,16,p_alb,true);
-									num_albaran:=1;
-									num_linea:=1;
+									with infog do
+									begin
+										max_elem:=nalbs;
+										ancho:=8;
+										liminf:=1;
+										paginas:=nalbs div 8;
+										resto:=nalbs mod 8;
+										if (paginas=1) and ( resto=0) then paginas:=0;
+										actual_page:=0;
+										if paginas=0 then limsup:=nalbs else
+											limsup:=8;
+										put_factura_general_albaranes(puntx,liminf,limsup,3,16);
+										p_alb:=inic;
+										put_linea_albaran(3,16,p_alb,true);
+										elem_actual:=1;
+										pos_en_ancho:=1;
+									end;
 									ypos:=16;
 									ya_estaba:=false;
-									if paginas<>0 then
 									repeat
 										 repeat until get_key(c_ascii,c_scancode,c_funcion,c_estado,c_teclas);
 										 if (c_teclas<>'') or (c_funcion=1) then
@@ -821,189 +801,54 @@ las lineas de albaran mediante los cursores *)
 
 											if c_teclas='ins' then
 											begin
-												write_msg('Has pulsado INS');
+												codigo:=puntx^.codigo;
+												add_albaran(inic,codigo,ahead,infog);
+												if ya_estaba then write_msg(' Pulsar F1 para quitar ayuda')
+													else write_msg('F1 - Ayuda para edici¢n de albaranes');
+												disp(infog,inic);
 											end;
 
 											if c_teclas='del' then
 											begin
-												write_msg('Has pulsado DEL');
+												codigo:=puntx^.codigo;
+												delete_albaran_fact(inic,puntx,ya_estaba,infog);
+												if ya_estaba then write_msg(' Pulsar F1 para quitar ayuda')
+													else write_msg('F1 - Ayuda para edici¢n de albaranes');
+												disp(infog,inic);
 											end;
 
 											if c_teclas='ret' then
 											begin
-												write_msg('Has pulsado RETURN');
+												codigo:=puntx^.codigo;
+												edit_albaran(inic,infog.elem_actual,codigo,ahead);
+												if ya_estaba then write_msg(' Pulsar F1 para quitar ayuda')
+													else write_msg('F1 - Ayuda para edici¢n de albaranes');
+												disp(infog,inic);
 											end;
 
-
-
-											 (* la tecla de abajo *)
+											 { la tecla de abajo }
 
 											 if c_teclas='dow' then
 											 begin
-												inc(num_linea);
-												if p_alb^.sig<>nil then
-												begin
-													aux:=p_alb;
-													auxpos:=ypos;
-													p_alb:=p_alb^.sig;
-													inc(num_albaran);
-												end;
-												if ypos<23 then inc(ypos);
-												if num_linea>8 then
-												begin
-													inc(limsup);
-													inc(liminf);
-													num_linea:=8;
-													ypos:=23;
-													blackout(3,16,79,23);
-													put_factura_general_albaranes(puntx,liminf,limsup,3,16);
-												end;
-												if limsup>nalbs then
-												begin
-													dec(limsup);
-													dec(liminf);
-													blackout(3,16,79,23);
-													put_factura_general_albaranes(puntx,liminf,limsup,3,16);
-												end;
-												put_linea_albaran(3,auxpos,aux,false);
-												put_linea_albaran(3,ypos,p_alb,true);
+												infog.tipo_desp:=2;
+												engine(infog);
+												disp(infog,inic);
 											end;
 
-											(* la tecla de arriba *)
+											{ la tecla de arriba }
 
 											if c_teclas='up' then
 											begin
-												dec(num_linea);
-												if p_alb<>inic then
-												begin
-													aux:=p_alb;
-													auxpos:=ypos;
-													p_alb:=inic;
-													dec(num_albaran);
-													if num_albaran>1 then
-														for kk:=1 to num_albaran-1 do p_alb:=p_alb^.sig;
-
-												end;
-												if ypos>16 then dec(ypos);
-												if num_linea<1 then
-												begin
-													dec(limsup);
-													dec(liminf);
-													num_linea:=1;
-													blackout(3,16,79,23);
-													put_factura_general_albaranes(puntx,liminf,limsup,3,16);
-													put_linea_albaran(3,ypos,p_alb,true);
-												end;
-												if liminf<1 then
-												begin
-													inc(limsup);
-													inc(liminf);
-													blackout(3,16,79,23);
-													put_factura_general_albaranes(puntx,liminf,limsup,3,16);
-												end;
-												put_linea_albaran(3,auxpos,aux,false);
-												put_linea_albaran(3,ypos,p_alb,true);
-											 end;
-										 end;
-									until c_teclas='esc'
-									else
-									repeat
-										 repeat until get_key(c_ascii,c_scancode,c_funcion,c_estado,c_teclas);
-										 if (c_teclas<>'') then
-										 begin
-
-											if c_funcion=1 then
-												if not(ya_estaba) then
-												begin
-													ya_estaba:=true;
-													write_msg('Pulsar F1 para quitar ayuda');
-													gettext(3,3,43,10,pantalla);
-													recuadro(3,3,43,10);
-													gotoxy(4,4);
-													write('INS - Inserta un nueva albaran, encima del');
-													gotoxy(4,5);
-													write('      seleccionado');
-													gotoxy(4,6);
-													write('DEL - Borra el albaran seleccionado');
-													gotoxy(4,7);
-													write('RETURN - Permite modificar el albaran');
-													gotoxy(4,8);
-													write('         seleccionado');
-													gotoxy(4,9);
-													write('ESC - Salir a menu de Facturas');
-												end
-												else
-												begin
-													ya_estaba:=false;
-													puttext(3,3,49,10,pantalla);
-												end;
-
-
-											if c_teclas='ins' then
-											begin
-												write_msg('Has pulsado INS');
-											end;
-
-											if c_teclas='del' then
-											begin
-												write_msg('Has pulsado DEL');
-											end;
-
-											if c_teclas='ret' then
-											begin
-												write_msg('Has pulsado RETURN');
-											end;
-
-
-											  (* la tecla de abajo *)
-
-											  if c_teclas='dow' then
-											  begin
-												 if num_linea<nalbs then inc(num_linea);
-												 if p_alb^.sig<>nil then
-												 begin
-													 aux:=p_alb;
-													 auxpos:=ypos;
-													 p_alb:=p_alb^.sig;
-													 inc(num_albaran);
-												 end;
-												 if ypos<15+nalbs then inc(ypos);
-												 if num_linea>8 then
-												 begin
-													 num_linea:=8;
-													 ypos:=23;
-												 end;
-												 put_linea_albaran(3,auxpos,aux,false);
-												 put_linea_albaran(3,ypos,p_alb,true);
+												infog.tipo_desp:=1;
+												engine(infog);
+												disp(infog,inic);
 											 end;
 
-											 (* la tecla de arriba *)
+											 puntx:=lugar(inic,infog.elem_actual);
 
-											 if c_teclas='up' then
-											 begin
-												 if num_linea>1 then dec(num_linea);
-												 if p_alb<>inic then
-												 begin
-													 aux:=p_alb;
-													 auxpos:=ypos;
-													 p_alb:=inic;
-													 dec(num_albaran);
-													 if num_albaran>1 then
-														 for kk:=1 to num_albaran-1 do p_alb:=p_alb^.sig;
 
-												 end;
-												 if ypos>16 then dec(ypos);
-												 if num_linea<1 then
-												 begin
-													 num_linea:=1;
-													 put_linea_albaran(3,ypos,p_alb,true);
-												 end;
-												 put_linea_albaran(3,auxpos,aux,false);
-												 put_linea_albaran(3,ypos,p_alb,true);
-											  end;
-										 end; { del if c_teclas<>'' }
-									until c_teclas='esc'; { del else del if del paginas }
-								end;
+									end;
+								until c_teclas='esc';
 							end
 							else error(12);
 						write_msg(' Salvar factura modificada (s/N)');
@@ -1013,17 +858,20 @@ las lineas de albaran mediante los cursores *)
 							borra_fact_index(ahead.num_factura);
 							actualiza_fact_index(ahead.num_factura);
 							borra_factura_f(pos);
-							nalbs:=graba_factura(ahead,inic); { nalbs no significa nalbs }
+							nalbs:=graba_factura_head(ahead,inic); { nalbs no significa nalbs }
+							if nalbs=1 then error(22);
+							nalbs:=graba_factura_lines(ahead,inic); { nalbs no significa nalbs }
 							if nalbs=1 then error(22);
 						end;
 						write_msg(' Modificar otra factura (S/n)');
-						ans:=si_no('S')
+						ans:=si_no('S');
+						borra_lista_facturas(inic);
 					end;
+				end;
 			until (j or not ans);
-			borra_lista_facturas(inic);
 
 	end;
-
+*)
 
 
 	procedure borrar_factura;
@@ -1037,6 +885,7 @@ las lineas de albaran mediante los cursores *)
 		campo:t_nodo_dato;
 		op,pos:word;
 		inic,puntx:listalbs;
+		fec:t_index2;
 		i  : byte;
 		c,t:char;
 		codigo:t_codigo;
@@ -1048,7 +897,6 @@ las lineas de albaran mediante los cursores *)
 		c_estado:t_estado;
 		c_teclas:str_3;
 	begin
-		crea_factura_ndx;
 			swap_menu(25,5,26);
 			repeat
 				ini_factura(ahead);
@@ -1110,23 +958,54 @@ las lineas de albaran mediante los cursores *)
 								ans:=si_no('N');
 								if ans then
 								begin
-									borra_factura_f(pos);
+
+									write_msg(' Borrando factura...');
+
+									{borra_factura_f(pos);}
+
+									{borra_factura_f esta en comentario para
+									arreglar un problemilla a la hora de buscar
+									facturas, como el desactiva_albaran}
 
 									(* ojo! aqui nalbs es una simple variable
 									que necesitaba de tipo word , no
 									significa una mierda *)
 
 									borra_fact_index(ahead.num_factura);
+
+
+
+
+
+									{$I-}
+									reset(fec_ndx);
+									{$I+}
+									if ioresult=0 then    { Esto es para cambiar el flag }
+										begin
+											puntx:=inic;
+											while puntx<>nil do
+											begin
+												pos:=busca_index_cod(puntx^.codigo,i);
+												repeat
+													read(fec_ndx,fec); (* antes habia un fec_index, ¨estara bien? *)
+												until fec.pos=pos;
+												fec.facturado:=false;
+												seek(fec_ndx,filepos(fec_ndx)-1);
+												write(fec_ndx,fec);
+												puntx:=puntx^.sig;
+											end;
+											close(fec_ndx);
+										end;
 									borra_lin_fact(ahead.num_factura);
 								end;
 
 							end
 							else error(12);
 						write_msg(' Borrar otra factura (S/n)');
-						ans:=si_no('S')
+						ans:=si_no('S');
+						borra_lista_facturas(inic);
 					end;
 			until (j or not ans);
-			borra_lista_facturas(inic);
 	end;
 
 

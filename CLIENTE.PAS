@@ -13,7 +13,7 @@ procedure listar_client;
 implementation
 
 	uses crt,defs,common,graficos,tfnomem,campstru,ficheros,gets,puts,
-    print,formulas,stats,facturas;
+	 print,formulas,stats,facturas;
 
 
 (* Rutina para comprobar el telefono del cliente y su existencia *)
@@ -420,12 +420,7 @@ var
 				val(trim(number),j_number,cod);
 				numero_factura.numero:=j_number;
 				numero_factura.letra:='A';
-				if op=2 then
-						begin
-							v:=true;
-							inc(ini.last_fact_number);
-							save_cfg;
-						end
+				if op=2 then v:=true
 						else begin v:=false; campo.dato:=''; end;
 			until v;
 
@@ -447,6 +442,15 @@ var
 			textcolor(CYAN);
 			textbackground(BLACK);
 			lowvideo;
+			reset(fec_ndx);
+			rewrite(temp_fec_ndx);
+			while not(eof(fec_ndx)) do
+			begin
+				read(fec_ndx,fecia);
+				write(temp_fec_ndx,fecia);
+			end;
+			close(temp_fec_ndx);
+			close(fec_ndx);
 			reset(fec_ndx);
 			while not(eof(fec_ndx)) do
 				begin
@@ -492,6 +496,12 @@ var
 												else inc(y);
 
 				{ Modificamos y escribimos el nuevo estado de fecia }
+
+				{ el cambiar a facturado:=true esta desactivado por que
+				si no no se puede realizar la factura cuantas veces se desee,
+				lo pongo a true si se decide emitir la factura}
+
+
 											fecia.facturado:=true;
 											seek(fec_ndx,filepos(fec_ndx)-1);
 											write(fec_ndx,fecia);
@@ -645,8 +655,61 @@ begin
 
 						end;
 
-					if not(todos) then
+{					if not(todos) then
 						begin
+}
+
+					facturar_uno(telefono);
+					factura_lista:=blb;
+
+					if factura_lista=nil then error(22)
+					else
+					begin
+
+						write_msg(' ¨Emitir factura? (s/N)');
+						ans:=si_no('N');
+
+						if ans then
+						begin
+
+							{escribe la factura almacenada en memoria a disco
+							blb:comienzo de la lista en memoria con los albaranes
+							pie:record con el bruto, desc, base_iva, base_rec_eq
+							ccliente:datos del cliente
+							number:numero de factura
+							}
+
+							ini_factura(factura_head);
+
+							with factura_head do
+							begin
+								telefono:=ccliente.telefono;
+								num_factura:=numero_factura;
+								totales:=pie;
+								fecha:=fecha_sistema;
+								total_neto:=pie.total-pie.descuento+pie.iva+pie.recargo_eq;
+								{
+								pagado:='n';
+								tipo_pago:=' ';
+								fecha_pago.day:=0;
+								fecha_pago.month:=0;
+								fecha_pago.year:=0;
+								}
+								totales.recargo_eq:=pie.recargo_eq;
+								iva:=ini.iva;
+								descuento:=ccliente.descuento;
+							end;
+
+
+							res:=graba_factura_head(factura_head,factura_lista);
+							res:=graba_factura_lines(factura_head,factura_lista);
+							inc(ini.last_fact_number);
+							save_cfg;
+							actualiza_fact_index(factura_head.num_factura);
+
+							{el make_stats esta castigado por fallar}
+
+							{make_stats;}
 
 							repeat
 								write_msg('Imprimir (S/n)');
@@ -661,6 +724,7 @@ begin
 												else begin
 													gotoxy(3,3);
 													textcolor(3);
+													blackout(1,2,80,24);
 													write('N£mero de copias : ');
 													with campo do
 														begin
@@ -680,7 +744,6 @@ begin
 							until (not(ans)or not((est.paper_out)or(est.io_error)));
 
 
-							facturar_uno(telefono);
 
 							if imp then begin
 								i:=0;
@@ -691,48 +754,31 @@ begin
 										begin
 											repeat
 												get_printer_status(est);
-											until not((est.busy)or(est.paper_out)or(est.io_error));
+											until not (est.paper_out);
 											print_fact_cliente(ccliente,blb,sub,cad,number,lim,pie,ju);
 											inc(i);
 										end
 										else i:=copias;
+										write_msg('Espere a que finalice la impresion y pulse una tecla');
+										C:=readkey;
+										write_msg('                                                    ');
 								until i=copias;
-							end
+							end; { del if imp}
+
+						end { del if ans }
+						else
+						begin
+							erase(fec_ndx);
+							rename(temp_fec_ndx,ini.work+'fecha.ndx');
+							assign(temp_fec_ndx,ini.work+'fecha.tmp');
+							assign(fec_ndx,ini.work+'fecha.ndx');
 						end;
 
-					{escribe la factura almacenada en memoria a disco
-					blb:comienzo de la lista en memoria con los albaranes
-					pie:record con el bruto, desc, base_iva, base_rec_eq
-					ccliente:datos del cliente
-					number:numero de factura
-					}
-
-					ini_factura(factura_head);
-
-					with factura_head do
-					begin
-						telefono:=ccliente.telefono;
-						num_factura:=numero_factura;
-						totales:=pie;
-						fecha:=fecha_sistema;
-						total_neto:=pie.total-pie.descuento+pie.iva+pie.recargo_eq;
-						{
-						pagado:='n';
-						tipo_pago:=' ';
-						fecha_pago.day:=0;
-						fecha_pago.month:=0;
-						fecha_pago.year:=0;
-						}
-						totales.recargo_eq:=200;
-						iva:=ini.iva;
-						descuento:=ccliente.descuento;
-					end;
-
 					factura_lista:=blb;
+			end;{ del if factura_lista:=nil}
 
-					res:=graba_factura(factura_head,factura_lista);
 
-					if res=1 then error(22);
+
 
 					while blb<>nil do {Borramos la lista de albaranes}
 						begin
@@ -750,7 +796,6 @@ begin
 			write_msg('                            ');
 		until j;
 
-		{make_stats;}
 
 end;
 

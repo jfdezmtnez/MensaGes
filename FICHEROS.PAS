@@ -9,33 +9,43 @@ var
 	tam:longint;
 
 
-function scan_socios_f:word;
+function scan_client_f (var telefonos:t_telefonos):word;
+function scan_dealer_f:word;
+function scan_messager_f:word;
+function scan_dispatch_f:word;
+function scan_facturas_f:word;
+function scan_lineas_alb_f:longint;
 
-function busca_socio_f (var ssocio:t_socio;pos:word):word;
+procedure busca_cliente_f (var ccliente:t_cliente; pos:word);
+function busca_comercial_f (var ccomercial:t_comercial; codigo:byte):byte;
+function busca_albaran_f (var aalbaran:t_albaran;codigo:t_codigo;i:byte;pos:word):word;
+function busca_mensajero_f (var mmensajero:t_mensajero; codigo:byte):byte;
 
-procedure ins_socio_f (var ssocio:t_socio; var max_socios:word);
+procedure ins_cliente_f (var ccliente:t_cliente; pos,max_cliente:word);
+procedure ins_comercial_f (var ccomercial:t_comercial; var max_comerciales:word);
+procedure ins_mensajero_f (var mmensajero:t_mensajero; var max_mensajeros:word);
+procedure ins_albaran_f (var aalbaran:t_albaran; var max_albaranes:word);
 
-(* No se si nos hara falta este....*)
-procedure borra_socio_f (pos:word; var max_socios:word);
+procedure borra_cliente_f (pos,max_clientes:word);
+procedure borra_comercial_f (pos:word; var max_comerciales:word);
+procedure borra_mensajero_f (pos:word; var max_mensajeros:word);
+procedure borra_albaran_f (pos:word; var max_albaranes:word);
 
 procedure create_cod_index;
-procedure create_alfa_index;
+procedure create_fec_index;
 
-procedure actualiza_cod_index(num:t_dni);
-procedure actualiza_alfa_index(nom:string[35]);
+procedure actualiza_cod_index(codigo:t_codigo);
+procedure actualiza_fec_index(fecha:t_date);
 
-function busca_index_cod(num:t_dni;var i:byte):word;
-function busca_index_alfa(nom:string[35]):word;
+function busca_index_cod(codigo:t_codigo;var i:byte):word;
+function busca_index_fec(fecha:t_date):word;
 
-procedure desactiva_socio(pos:word);
+procedure desactiva_albaran(pos:word);
 procedure limpia;
 
-procedure borra_cod_index(num:t_dni);
-{
+procedure borra_cod_index(codigo:t_codigo);
 procedure borra_cod_dsk(codigo:t_codigo);
-}
-procedure borra_alfa_index(nom:string[35];pos:longint);
-{
+procedure borra_fec_index(fecha:t_date;pos:longint);
 procedure archiva_f (lim:longint);
 
 procedure crea_factura_ndx;
@@ -44,9 +54,6 @@ procedure borra_fact_index(codigo:t_codigo);
 function busca_index_fact(codigo:t_codigo; var i:byte):word;
 procedure borra_factura_f (pos:word);
 function busca_factura_f(var head:t_factura_head; var punt:listalbs; pos:word):byte;
-}
-
-(* Pueden valer para lo de las actividades y las transacs..*)
 
 function graba_factura_head(var j:t_factura_head; var lista:listalbs):byte;
 function graba_factura_lines(var j:t_factura_head; var lista:listalbs):byte;
@@ -64,74 +71,441 @@ implementation
 	uses campstru,graficos,windos ;
 
 
-(* Devuelve el n£mero de socios en el fichero *)
-
-	function scan_socios_f;
+	function scan_client_f;
 	var
-		k : word;
+		ccliente: t_cliente;
+		k       : word;
 	begin
 		k:=0;
 		{$I-}
-		Reset(fichsocios);
+		Reset(fichclientes);
+		{$I+}
+		IF IOresult=0 then
+			begin
+				while not(eof(fichclientes)) do
+					begin
+						inc(k);
+						read(fichclientes,ccliente);
+						telefonos[k]:=ccliente.telefono
+					end;
+				close(fichclientes)
+			end;
+		scan_client_f:=k
+	end;
+
+
+
+(* Devuelve el n£mero de comerciales en el fichero *)
+
+	function scan_dealer_f;
+	var
+		ccomercial: t_comercial;
+		k         : word;
+	begin
+		k:=0;
+		{$I-}
+		Reset(fichcomercia);
+		{$I+}
+		if IOresult=0 then
+		begin
+			scan_dealer_f:=filesize(fichcomercia);
+			close(fichcomercia);
+		end else scan_dealer_f:=0;
+	end;
+
+
+
+
+(* Devuelve el n£mero de mensajeros en el fichero *)
+
+	function scan_messager_f;
+	var
+		mmensajero: t_mensajero;
+		k         : word;
+	begin
+		k:=0;
+		{$I-}
+		Reset(fichmessager);
 		{$I+}
 		if IOresult=0 then
 			begin
-				scan_socios_f:=filesize(fichsocios);
-				close(fichsocios);
-			end else scan_socios_f:=0;
+				scan_messager_f:=filesize(fichmessager);
+				close(fichmessager);
+			end else scan_messager_f:=0;
+	end;
+
+
+
+(* N£mero de albaranes en el fichero del mes *)
+
+	function scan_dispatch_f;
+	var
+		aalbaran: t_albaran;
+		k       : word;
+	begin
+		k:=0;
+		{$I-}
+		Reset(fichalbs);
+		{$I+}
+		if IOresult=0 then
+			begin
+				scan_dispatch_f:=filesize(fichalbs);
+				close(fichalbs);
+			end else scan_dispatch_f:=0;
+	end;
+
+(* numero de facturas totales *)
+
+	function scan_facturas_f;
+	var
+		cfact:t_factura_head;
+		k:word;
+	begin
+		k:=0;
+		{$I-}
+		Reset(fichfact);
+		{$I+}
+		if IOresult=0 then
+			begin
+				scan_facturas_f:=filesize(fichfact);
+				close(fichfact);
+			end else scan_facturas_f:=0;
+	end;
+
+
+	function scan_lineas_alb_f;
+	var
+		clin:tipo_albs;
+	begin
+		{$I-}
+		Reset(fichlin);
+		{$I+}
+		if IOresult=0 then
+			begin
+				scan_lineas_alb_f:=filesize(fichlin);
+				close(fichlin);
+			end else scan_lineas_alb_f:=0;
+	end;
+
+
+
+(* Lee los datos de un cliente del fichero *)
+
+	procedure busca_cliente_f;
+	var
+		k    : word;
+	begin
+		ini_cliente(ccliente);
+		{$I-}
+		Reset(fichclientes);
+		{$I+}
+		if IOresult<>0 then begin error(1); end
+			else begin
+				for k:=1 to pos do read(fichclientes,ccliente);
+				close(fichclientes)
+			end
 	end;
 
 
 (* Las funciones de b£squeda en fichero devuelven 0 si no existe el fichero o
 no existe el buscado *)
 
-(* Lee los datos de un socio de un fichero dado *)
+(* Lee los datos de un comercial del fichero *)
 
-	function busca_socio_f;
+	function busca_comercial_f;
+	var
+		v    : boolean;
+		k    : word;
 	begin
+		v:=false;
+		k:=0;
+		ini_comercial(ccomercial);
 		{$I-}
-		reset(fichsocios);
+		Reset(fichcomercia);
 		{$I+}
-		if ioresult=0 then
+		if IOresult=0 then
 			begin
-				seek(fichsocios,pos-1);
-				read(fichsocios,ssocio);
-				close(fichsocios);
-				busca_socio_f:=pos
-			end
-			else
+				while not (eof(fichcomercia) or v) do
+					begin
+						inc(k);
+						read(fichcomercia,ccomercial);
+						if ccomercial.codigo=codigo then v:=true
+					end;
+				close(fichcomercia)
+			end;
+		if v then busca_comercial_f:=k
+			else busca_comercial_f:=0;
+	end;
+
+
+
+	function assign_f_albs (i:byte):byte;
+	var
+		path : string;
+		ext  : string;
+		ctrl : boolean;
+		c    : char;
+	begin
+		path:='';
+		ctrl:=false;
+		str(i,ext);
+		while length(ext)<3 do ext:='0'+ext;
+		path:='a:\albaran.'+ext;
+		ext:=' Inserte el disco n§ '+ext+' (Pulse una tecla)';
+		repeat
+			write_msg(ext);
+			c:=readkey;
+			write_msg('                          ');
+			if c=#27 then
 				begin
-					error(10)
-					busca_socio_f:=0
+					ctrl:=true;
+					assign_f_albs:=1
 				end
+				else if disksize(1)<>-1 then
+					begin
+						assign(albsdsk,path);
+						{$I-}
+						if ini.new_disk then
+							begin
+								rewrite(albsdsk);
+								if ioresult<>0 then
+									begin
+										error(0);
+										write_msg(' Retire el disco y compruebelo');
+										repeat until keypressed
+									end
+									else begin
+										ctrl:=true;
+										ini.new_disk:=false;
+										save_cfg;
+									end
+							end
+							else begin
+								reset(albsdsk);
+								if ioresult=0 then ctrl:=true
+								{$I+}
+									else begin
+										error(20);
+										write_msg(' ')
+									end
+							end
+				end;
+		until ctrl;
+		if c<>#27 then assign_f_albs:=0
+	end;
+
+(* Lee los datos de un albaran de un fichero dado *)
+
+	function busca_albaran_f;
+	var
+		ctrl : byte;
+	begin
+		ini_albaran(aalbaran);
+
+		if i=0 then
+			begin
+				{$I-}
+				reset(fichalbs);
+				{$I+}
+				if ioresult=0 then
+					begin
+						seek(fichalbs,pos-1);
+						read(fichalbs,aalbaran);
+						close(fichalbs);
+						busca_albaran_f:=pos
+					end
+					else error(10)
+			end
+			else begin
+				if assign_f_albs(i)=0 then
+					begin
+						seek(albsdsk,pos-1);
+						read(albsdsk,aalbaran);
+						close(albsdsk);
+						busca_albaran_f:=pos
+					end
+					else busca_albaran_f:=0
+			end
 
 	end;
 
 
 
-(* A¤adir un socio *)
 
-procedure ins_socio_f;
+(* Lee los datos de un mensajero *)
+
+	function busca_mensajero_f;
+	var
+		v    : boolean;
+		k    : word;
+	begin
+		v:=false;
+		k:=0;
+		ini_mensajero(mmensajero);
+		{$I-}
+		Reset(fichmessager);
+		{$I+}
+		if IOresult=0 then
+			begin
+				while not (eof(fichmessager) or v) do
+					begin
+						inc(k);
+						read(fichmessager,mmensajero);
+						if mmensajero.codigo=codigo then v:=true
+					end;
+				close(fichmessager)
+			end;
+		if v then busca_mensajero_f:=k
+			else busca_mensajero_f:=0;
+	end;
+
+
+
+
+(* Introduce un nuevo cliente en el fichero *)
+
+	procedure ins_cliente_f;
+	var
+		aux  : t_cliente;
+		k    : word;
+	begin
+		if max_cliente=1 then
+			begin
+				rewrite(fichclientes);
+				write(fichclientes,ccliente);
+				close(fichclientes)
+			end
+			else begin
+				{$I-}
+				Reset(fichclientes);
+				{$I+}
+				if IOresult<>0 then
+					begin error(1); lowbar('Men£ Clientes') end
+					else begin
+						Rewrite(tempclientes);
+						for k:=1 to pos-1 do
+							begin
+								read(fichclientes,aux);
+								write(tempclientes,aux);
+							end;
+						write(tempclientes,ccliente);
+						while not eof(fichclientes) do
+							begin
+								read(fichclientes,aux);
+								write(tempclientes,aux)
+							end;
+						close(fichclientes);
+						close(tempclientes);
+						erase(fichclientes);
+						rename(tempclientes,ini.work+'clientes.dat');
+						assign(tempclientes,ini.work+'clientes.tmp');
+						assign(fichclientes,ini.work+'clientes.dat')
+					end
+		end
+	end;
+
+
+	procedure ins_comercial_f;
+	var
+		aux  : t_comercial;
+	begin
+		if max_comerciales=0 then
+			begin
+				rewrite(fichcomercia);
+				write(fichcomercia,ccomercial);
+				inc(max_comerciales);
+				close(fichcomercia);
+			end
+			else begin
+				{$I-}
+				Reset(fichcomercia);
+				{$I+}
+				if IOresult<>0 then begin error(4);lowbar('Men£ Comerciales') end
+					else begin
+						Rewrite(tempcomercia);
+						while not eof(fichcomercia) do
+							begin
+								read(fichcomercia,aux);
+								write(tempcomercia,aux);
+							end;
+						close(fichcomercia);
+						write(tempcomercia,ccomercial);
+						close(tempcomercia);
+						erase(fichcomercia);
+						rename(tempcomercia,ini.work+'dealers.dat');
+						assign(tempcomercia,ini.work+'dealers.tmp');
+						assign(fichcomercia,ini.work+'dealers.dat');
+						inc(max_comerciales)
+					end
+			end
+	end;
+
+
+
+(* A¤adir un mensajero a la n¢mina *)
+
+	procedure ins_mensajero_f;
+	var
+		aux  : t_mensajero;
+	begin
+		if max_mensajeros=0 then
+			begin
+				rewrite(fichmessager);
+				write(fichmessager,mmensajero);
+				inc(max_mensajeros);
+				close(fichmessager)
+			end
+			else begin
+				{$I-}
+				Reset(fichmessager);
+				{$I+}
+				if IOresult<>0 then begin error(7);lowbar('Men£ Mensajeros') end
+					else begin
+						Rewrite(tempmessager);
+						while not eof(fichmessager) do
+							begin
+								read(fichmessager,aux);
+								write(tempmessager,aux);
+							end;
+						close(fichmessager);
+						write(tempmessager,mmensajero);
+						close(tempmessager);
+						erase(fichmessager);
+						rename(tempmessager,ini.work+'messager.dat');
+						assign(tempmessager,ini.work+'messager.tmp');
+						assign(fichmessager,ini.work+'messager.dat');
+						inc(max_mensajeros)
+					end
+			end
+	end;
+
+
+
+(* A¤adir un albar n *)
+
+procedure ins_albaran_f;
 
 var
-	aux  : t_socio;
+	aux  : t_albaran;
+	f    : t_fichalbs;
 
 begin
 	{$I-}
-	Reset(fichsocios);
+	Reset(fichalbs);
 	{$I+}
 	if ioresult<>0 then
 		begin
-			rewrite(fichsocios);
-			write(fichsocios,ssocio);
-			inc(max_socios)
+			rewrite(fichalbs);
+			write(fichalbs,aalbaran);
+			inc(max_albaranes)
 		end
 		else begin
-			seek(fichsocios,filesize(fichsocios));
-			write(fichsocios,ssocio);
-			inc(max_socios);
+			seek(fichalbs,filesize(fichalbs));
+			write(fichalbs,aalbaran);
+			inc(max_albaranes);
+
 		end;
-	close(fichsocios)
+	close(fichalbs)
 end;
 
 
