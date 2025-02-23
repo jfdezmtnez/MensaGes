@@ -1,0 +1,31 @@
+<% content_for :title, "Invoices" %>
+
+<div class="w-full">
+  <% if notice.present? %>
+    <p class="py-2 px-3 bg-green-50 mb-5 text-green-500 font-medium rounded-md inline-block" id="notice"><%= notice %></p>
+  <% end %>
+
+  <div class="flex justify-between items-center">
+    <h1 class="font-bold text-4xl">Invoices</h1>
+    <%= link_to "New invoice", new_invoice_path, class: "rounded-md px-3.5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white block font-medium" %>
+  </div>
+
+  <div id="invoices" class="min-w-full divide-y divide-gray-200 space-y-5">
+    <% if @invoices.any? %>
+      <% @invoices.each do |invoice| %>
+        <div class="flex justify-between items-center">
+          <%= render invoice %>
+          <div class="space-x-2">
+            <%= link_to "Show", invoice, class: "rounded-md px-3.5 py-2.5 bg-gray-100 hover:bg-gray-50 inline-block font-medium" %>
+            <%= link_to "Edit", edit_invoice_path(invoice), class: "rounded-md px-3.5 py-2.5 bg-gray-100 hover:bg-gray-50 inline-block font-medium" %>
+            <div class="inline-block">
+              <%= button_to "Destroy", invoice, method: :delete, class: "rounded-md px-3.5 py-2.5 text-white bg-red-600 hover:bg-red-500 font-medium cursor-pointer", data: { turbo_confirm: "Are you sure?" } %>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    <% else %>
+      <p class="text-center my-10">No invoices found.</p>
+    <% end %>
+  </div>
+</div>

@@ -1,0 +1,15 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  description: MyString
+  weight: 1.5
+  distance: 1.5
+  duration: 2025-02-23 10:37:16
+  price: 1.5
+
+two:
+  description: MyString
+  weight: 1.5
+  distance: 1.5
+  duration: 2025-02-23 10:37:16
+  price: 1.5

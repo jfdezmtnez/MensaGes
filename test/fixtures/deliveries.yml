@@ -1,0 +1,19 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  customer: one
+  courier: one
+  pickup: 2025-02-23 10:39:22
+  delivered: 2025-02-23 10:39:22
+  tariff: one
+  invoiced: false
+  reimburse: false
+
+two:
+  customer: two
+  courier: two
+  pickup: 2025-02-23 10:39:22
+  delivered: 2025-02-23 10:39:22
+  tariff: two
+  invoiced: false
+  reimburse: false

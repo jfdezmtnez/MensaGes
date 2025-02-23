@@ -1,0 +1,16 @@
+# README
+
+MensaGes - no frills minimal ERP for courier agancies
+
+Dseigned in 1994-1996 as a standalone self-contained DOS application to run with minimal hardware
+requirements - MensaGes can run on truly minimal hardware: Intel 80286 with 640kB or RAM
+
+Despite those lowwly requirements, it supported complete management of:
+ * Customer accounts
+ * Couriers
+ * Sales
+ * Deliveries
+ * Invoices (inicluding printing!)
+
+This is an attempt by the same foolhardy developers to rebuild
+it as a web-based application for modern use.
