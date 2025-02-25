@@ -20,9 +20,11 @@
 require 'phonelib'
 
 class Person < ApplicationRecord
+	include PgSearch::Model
 	belongs_to :address
 	has_many :couriers
 	has_many :sellers
+	pg_search_scope :search, against: [:nick, :surname1, :surname2], ignoring: :accents, using: { tsearch: {prefix: true} }
 	validates :cif, presence: true, uniqueness: { case_sensitive: false }
 	validates :name, :surname1, presence: true
 	validates :email, format: { with: URI::MailTo::EMAIL_REGEXP }, allow_blank: true
