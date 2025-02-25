@@ -20,10 +20,11 @@
 class CreateTariffs < ActiveRecord::Migration[8.0]
 	def change
 		create_table :tariffs do |t|
+			t.references :company, null: false, foreign_key: true
 			t.string :description
 			t.float :weight
 			t.float :distance
-			t.time :duration
+			t.float :duration # Storing duration as a float (in hours or minutes)
 			t.float :price
 
 			t.timestamps

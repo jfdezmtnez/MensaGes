@@ -21,6 +21,7 @@ class Company < ApplicationRecord
 	belongs_to :person # A Company is linked to a Person
 	has_many :couriers
 	has_many :sellers
+	has_many :tariffs
 
 	validates :person, presence: true
 end

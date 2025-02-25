@@ -26,6 +26,16 @@ class Delivery < ApplicationRecord
 	belongs_to :destination, class_name: 'Address'
 	has_many :packages, dependent: :destroy
 
-	# Optional: Add validations if needed
+	# Add validations if needed
 	validates :customer, :courier, :origin, :destination, :tariff, :seller, presence: true
+
+	# A method to calculate the price of the delivery based on the tariff and other factors
+	def calculate_price
+		# Assuming tariffs have a base price, you can multiply or adjust this price based on weight, distance, or other parameters
+		base_price = self.tariff.price
+		#weight_factor = self.packages.sum(:weight) * 0.5 # Example weight factor
+		#distance_factor = self.distance * 0.2 # Example distance factor
+
+		#base_price + weight_factor + distance_factor
+	end
 end
