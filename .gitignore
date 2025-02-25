@@ -33,5 +33,23 @@
 # Ignore master key for decrypting credentials and more.
 /config/master.key
 
+# Ignore local environment.
 /app/assets/builds/*
 !/app/assets/builds/.keep
+Gemfile.lock
+/Gemfile.lock
+/vendor/*
+!/vendor/.keep
+/node_modules/*
+!/node_modules/.keep
+/yarn.lock
+/public/packs/*
+!/public/packs/.keep
+/public/packs-test/*
+!/public/packs-test/.keep
+/public/storage/*
+!/public/storage/.keep
+/public/uploads/*
+!/public/uploads/.keep
+/public/system/*
+!/public/system/.keep

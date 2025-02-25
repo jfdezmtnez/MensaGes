@@ -60,3 +60,5 @@ group :test do
   gem "capybara"
   gem "selenium-webdriver"
 end
+
+gem "phonelib", "~> 0.10.5"
