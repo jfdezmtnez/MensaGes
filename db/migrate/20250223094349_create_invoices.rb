@@ -21,15 +21,15 @@ class CreateInvoices < ActiveRecord::Migration[8.0]
 	def change
 		create_table :invoices do |t|
 			t.references :customer, null: false, foreign_key: true
-			t.string :invoice_number, null: false, unique: true
+			t.string :invoice_number, null: false
 			t.date :issue_date, null: false
 			t.date :due_date
 			t.decimal :total_amount, precision: 10, scale: 2, default: 0.0
 			t.string :status, default: "pending"
-			t.timestamps
 			t.string :remarks
 
 			t.timestamps
 		end
+		add_index :invoices, :invoice_number, unique: true  # Adds a unique index for faster lookups
 	end
 end

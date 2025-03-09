@@ -13,6 +13,9 @@
 # gem "pg"
 #
 default: &default
+  host: <%= ENV.fetch('DB_HOST', 'localhost') %>
+  username: <%= ENV.fetch('DB_USERNAME','mensa_ges') %>
+  password: <%= ENV.fetch('DB_PASSWORD', 'P3q.ñaLang0s74') %>
   adapter: postgresql
   encoding: unicode
   # For details on connection pooling, see Rails configuration guide
@@ -81,9 +84,7 @@ test:
 production:
   primary: &primary_production
     <<: *default
-    database: mensa_ges_production
-    username: mensa_ges
-    password: <%= ENV["MENSA_GES_DATABASE_PASSWORD"] %>
+    database: <%= ENV.fetch('DB_NAME', 'mensa_ges') %>
   cache:
     <<: *primary_production
     database: mensa_ges_production_cache

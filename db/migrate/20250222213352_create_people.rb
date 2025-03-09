@@ -25,7 +25,7 @@ class CreatePeople < ActiveRecord::Migration[8.0]
 			t.string :surname1
 			t.string :surname2
 			t.date :birthday
-			t.string :cif, null: false, unique: true
+			t.string :cif, null: false
 			t.string :phone
 			t.string :email
 			t.references :address, null: false, foreign_key: true

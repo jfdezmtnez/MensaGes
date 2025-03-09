@@ -26,7 +26,6 @@ class CreatePackages < ActiveRecord::Migration[8.0]
 			t.float :length
 			t.float :width
 			t.float :height
-			t.references :delivery, null: false, foreign_key: true
 			
 			t.timestamps
 		end

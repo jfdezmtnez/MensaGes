@@ -33,5 +33,6 @@ class CreateDeliveries < ActiveRecord::Migration[8.0]
 
 			t.timestamps
 		end
+		add_reference :packages, :delivery,foreign_key: true, default: :null
 	end
 end

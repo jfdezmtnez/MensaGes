@@ -53,3 +53,4 @@ Gemfile.lock
 !/public/uploads/.keep
 /public/system/*
 !/public/system/.keep
+db/schema.rb
