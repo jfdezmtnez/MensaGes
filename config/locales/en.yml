@@ -201,7 +201,7 @@ en:
     sales_a: "Sales"
     user: "User"
     user_a: "User"
-  salesperson:
+  seller:
     created: "Created sales person: "
     deleted: "Deleted sales person: "
     duplicate: "Duplicate sales person: "

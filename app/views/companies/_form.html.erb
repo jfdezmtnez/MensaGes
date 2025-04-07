@@ -32,6 +32,6 @@
   </div>
 
   <div class="inline">
-    <%= form.submit class: "rounded-md px-3.5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white inline-block font-medium cursor-pointer" %>
+    <%= render Button.new(variant: :primary, options: { label: "Save", type: :submit, stimulus: { controller: "form", action: "submit->form#disableOnSubmit", loading: true } }) %>
   </div>
 <% end %>

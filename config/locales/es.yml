@@ -201,7 +201,7 @@ es:
     sales_a: "Ent."
     user: "Usuario"
     user_a: "Us."
-  salesperson:
+  seller:
     created: "Comercial creado: "
     deleted: "Comercial borrado: "
     duplicate: "Comercial duplicado: "
