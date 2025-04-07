@@ -1,0 +1,255 @@
+# MensaGes - No-frills ERP built on Rails to manage a courier agency.
+# Copyright (C) 2025 Francisco Javier Fernández Martínez & Iván González Angullo
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the Affero GNU General Public License as published
+# by the Free Software Foundation, either version 3 of the License, or any
+# later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#
+# contact email - fran.fdezmtnez@gmail.com / iangullo@gmail.com
+#
+# Files in the config/locales directory are used for internationalization and
+# are automatically loaded by Rails. If you want to use locales other than
+# English, add the necessary files in this directory.
+#
+# To use the locales, use `I18n.t`:
+#
+#     I18n.t "hello"
+#
+# In views, this is aliased to just `t`:
+#
+#     <%= t("hello") %>
+#
+# To use a different locale, set it with `I18n.locale`:
+#
+#     I18n.locale = :es
+#
+# This would use the information in config/locales/es.yml.
+#
+# To learn more about the API, please read the Rails Internationalization guide
+# at https://guides.rubyonrails.org/i18n.html.
+#
+# Be aware that YAML interprets the following case-insensitive strings as
+# booleans: `true`, `false`, `on`, `off`, `yes`, `no`. Therefore, these strings
+# must be quoted to be interpreted as strings. For example:
+#
+#     en:
+#       "yes": yup
+#       enabled: "ON"
+es:
+  action:
+    admin: "Administrar"
+    backup: "Backup"
+    cancel: "Cancelar"
+    change: "Cambiar"
+    clear: "Borrar"
+    close: "Cerrar"
+    configure: "Configurar"
+    copy: "Copiar"
+    create: "Crear"
+    edit: "Editar"
+    export: "Exportar"
+    filter: "Filtrar"
+    import: "Importar"
+    next: ">>"
+    login: "Entrar"
+    logout: "Salir"
+    previous: "<<"
+    restore: "Restaurar"
+    return: "Volver"
+    save: "Guardar"
+    search: "Buscar"
+    select: "Seleccionar"
+  calendar:
+    label: "Calendario"
+    date: "Fecha"
+    week: "Semana"
+    month: "Mes"
+    year: "Año"
+    time: "Hora"
+    mins: "mins."
+    start: "Inicio"
+    end: "Fin"
+    attendance: "Asistencia"
+    monthnames: [Todos, Enero, Febrero, Marzo, Abril, Mayo, Junio, Julio, Agosto, Septiembre, Octubre, Noviembre, Diciembre]
+    monthnames_a: [Todos, Ene, Feb, Mar, Abr, May, Jun, Jul, Ago, Sep, Oct, Nov, Dic]
+    daynames: [Todos, Lunes, Martes, Miércoles, Jueves, Viernes, Sábado, Domingo]
+    daynames_a: [Todos, Lun, Mar, Mié, Jue, Vie, Sáb, Dom]
+  company:
+    created: "Compañía creada: "
+    deleted: "Compañía borrada: "
+    duplicate: "Compañía duplicada: "
+    edit: "Editar Compañía"
+    entity: "Entidad"
+    logo: "Logo"
+    many: "Compañías"
+    new: "Nueva Compañía"
+    none: "Sin compañía"
+    single: "Compañía"
+    updated: "Compañía guardada: "
+    website: "Sitio web"
+  courier:
+    created: "Mensajero creado: "
+    deleted: "Mensajero borrado: "
+    duplicate: "Mensajero duplicado: "
+    edit: "Editar mensajero"
+    export: "Mensajeros exportados"
+    import: "Mensajeros importados"
+    many: "Mensajeros"
+    new: "Crear mensajero"
+    single: "Mensajero"
+    updated: "Mensajero actualizado: "
+  customer:
+    created: "Cliente creado: "
+    deleted: "Cliente borrado: "
+    duplicate: "Cliente duplicado: "
+    edit: "Editar cliente"
+    export: "Clientes exportados"
+    import: "Clientes importados"
+    many: "Clientes"
+    new: "Crear cliente"
+    single: "Cliente"
+    updated: "Cliente actualizado: "
+  delivery:
+    created: "Envío creado: "
+    deleted: "Envío borrado: "
+    duplicate: "Envío duplicado: "
+    edit: "Editar cliente"
+    export: "Envíos exportados"
+    import: "Envíos importados"
+    many: "Envíos"
+    new: "Crear cliente"
+    single: "Envío"
+    updated: "Envío actualizado: "
+  invoice:
+    created: "Factura creada: "
+    deleted: "Factura borrada: "
+    edit: "Editar factura"
+    many: "Facturas"
+    new: "Crear factura"
+    paid: "Factura pagada: "
+    single: "Factura"
+    updated: "Factura actualizada: "
+  locale:
+    country: "País"
+    lang: "Idioma"
+    en: "Inglés"
+    es: "Español"
+  location:
+    duplicate: "Ubicación duplicada: "
+    created: "Ubicación creada: "
+    updated: "Ubicación guardada: "
+    deleted: "Ubicación borrada: "
+    many: "Ubicaciones"
+    edit: "Editar Ubicación"
+    new: "Crear Ubicación"
+    single: "Ubicación"
+    name: "Nombre"
+    abbr: "Ubic."
+    see: "(ver ubicación)"
+    none: "(sin ubicación)"
+    gmaps: "Enlace Google Maps"
+    default: "<nueva ubic.>"
+  package:
+    created: "Paquete creado: "
+    deleted: "Paquete borrado: "
+    duplicate: "Paquete duplicado: "
+    edit: "Editar paquete"
+    list: "Albarán"
+    many: "Paquetes"
+    new: "Crear paquete"
+    single: Paquete"
+    updated: "Paquete actualizado: "
+  password:
+    single: "Contraseña"
+    blank_abort: "(dejar en blanco si no quiere cambiarla)"
+    change: "Cambiar Contraseña"
+    confirm: "Confirmar contraseña"
+    confirm_label: "(*) confirmar contraseña"
+    confirm_wait: "Esperando confirmación de: "
+    min_chars: "Longitud mínima: "
+    new: "Nueva contraseña"
+    old: "Contraseña actual"
+  question:
+    active: "¿Activo?"
+    camera: "¿Usar la camara?"
+    clear: "¿Borrar historial de "
+    delete: "¿Borrar "
+    female: "¿Femenino?"
+    import: "¿Importar datos?"
+    login: "¿Abrir sesión?"
+    save: "¿Guardar "
+    save_chng: "¿Guardar Cambios?"
+  role:
+    admin: "Administrador"
+    admin_a: "Adm."
+    courier: "Mensajero"
+    courier_a: "Mensaj."
+    customer: "Cliente"
+    customer_a: "Cli."
+    manager: "Coordinador"
+    manager_a: "Coord."
+    sales: "Entrenador"
+    sales_a: "Ent."
+    user: "Usuario"
+    user_a: "Us."
+  salesperson:
+    created: "Comercial creado: "
+    deleted: "Comercial borrado: "
+    duplicate: "Comercial duplicado: "
+    edit: "Editar Comercial"
+    export: "Comerciales exportados"
+    import: "Comerciales importados"
+    many: "Comercials"
+    new: "Crear comercial"
+    single: "Comercial"
+    updated: "Comercial actualizado: "
+  server:
+    about: "Acerca de ..."
+    build: "Rev. #"
+    info-1: "Aplicación web libre para la gestión"
+    info-2: "de agencias de mensajería:"
+    info-3: "Compañías: configuración, tarifas, etc."
+    info-4: "Clientes: datos y estadísticas."
+    info-5: "Envíos: albaranes, y seguimiento."
+    info-6: "Facturas."
+    published: "Publicado con licencia Affero GNU GPLv3"
+    log: "Registros"
+    single: "Servidor"
+    website: "MensaGes wiki"
+  stat:
+    average: "Media"
+    average_a: "Med."
+    many: "Estadísticas"
+    max: "Máx."
+    min: "Mín."
+    num_a: "Núm."
+    total: "Total"
+    total_a: "Tot."
+    updated: "Estadísticas guardadas"
+  user:
+    actions: "Acciones"
+    cleared: "Historial limpiado: "
+    created: "Usuario creado: "
+    deleted: "Usuario borrado: "
+    duplicate: "Usuario duplicado: "
+    edit: "Editar Usuario"
+    last_in: "Ult. Entrada"
+    many: "Usuarios"
+    never: "(sin entradas)"
+    new: "Crear Usuario"
+    no_email: "¡falta e-mail del usuario!"
+    profile: "Perfil"
+    single: "Usuario"
+    updated: "Usuario guardado: "
+  version:
+    many: "Cambios"
+    single: "Versión"

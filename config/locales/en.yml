@@ -1,3 +1,21 @@
+# MensaGes - No-frills ERP built on Rails to manage a courier agency.
+# Copyright (C) 2025 Francisco Javier Fernández Martínez & Iván González Angullo
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the Affero GNU General Public License as published
+# by the Free Software Foundation, either version 3 of the License, or any
+# later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#
+# contact email - fran.fdezmtnez@gmail.com / iangullo@gmail.com
+#
 # Files in the config/locales directory are used for internationalization and
 # are automatically loaded by Rails. If you want to use locales other than
 # English, add the necessary files in this directory.
@@ -26,6 +44,212 @@
 #     en:
 #       "yes": yup
 #       enabled: "ON"
-
 en:
-  hello: "Hello world"
+  action:
+    admin: "Manage"
+    backup: "Backup"
+    cancel: "Cancel"
+    change: "Change"
+    clear: "Clear"
+    close: "Close"
+    configure: "Configure"
+    copy: "Copy"
+    create: "Create"
+    edit: "Edit"
+    export: "Export"
+    filter: "Filter"
+    import: "Import"
+    next: ">>"
+    login: "Log in"
+    logout: "Log out"
+    previous: "<<"
+    restore: "Recover"
+    return: "Return"
+    save: "Save"
+    search: "Search"
+    select: "Select"
+  calendar:
+    label: "Calendar"
+    date: "Date"
+    week: "Week"
+    month: "Month"
+    year: "Year"
+    time: "Time"
+    mins: "mins."
+    start: "Start"
+    end: "End"
+    attendance: "Attendance"
+    monthnames: [All, January, February, March, April, May, June, July, August, September, October, November, December]
+    monthnames_a: [All, Jan, Feb, Mar, Apr, May, Jun, Jul, Aug, Sep, Oct, Nov, Dec]
+    daynames: [All, Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday]
+    daynames_a: [All, Mon, Tue, Wed, Thu, Fri, Sat, Sun]
+  company:
+    created: "Created company: "
+    deleted: "Deleted company: "
+    duplicate: "Duplicate company: "
+    edit: "Edit Company"
+    entity: "Legal entity"
+    logo: "Logo"
+    many: "Companies"
+    new: "Edit Company"
+    none: "No company"
+    single: "Company"
+    updated: "Updated company: "
+    website: "Website"
+  courier:
+    created: "Created courier: "
+    deleted: "Deleted courier: "
+    duplicate: "Duplicate courier: "
+    edit: "Edit courier"
+    export: "Exported couriers"
+    import: "Imported couriers"
+    many: "Couriers"
+    new: "Create courier"
+    single: "Courier"
+    updated: "Updated courier: "
+  customer:
+    created: "Created customer: "
+    deleted: "Deleted customer: "
+    duplicate: "Duplicate customer: "
+    edit: "Edit Customer"
+    export: "Exported customers"
+    import: "Imported customers"
+    many: "Customers"
+    new: "Create Customer"
+    single: "Customer"
+    updated: "Updated customer: "
+  delivery:
+    created: "Created delivery: "
+    deleted: "Deleted delivery: "
+    duplicate: "Duplicate delivery: "
+    edit: "Edit Delivery"
+    export: "Exported deliveries"
+    import: "Imported deliveries"
+    many: "Couriers"
+    new: "Create Delivery"
+    single: "Delivery"
+    updated: "Updated delivery: "
+  invoice:
+    created: "Created invoice: "
+    deleted: "Deleted invoice: "
+    edit: "Edit Invoice"
+    many: "Invoices"
+    new: "Create invoice"
+    paid: "Invoice paid: "
+    single: "Invoice"
+    updated: "Updated invoice: "
+  locale:
+    country: "Country"
+    lang: "Language"
+    en: "English"
+    es: "Spanish"
+  location:
+    duplicate: "Duplicate Location: "
+    created: "Created location: "
+    updated: "Updated location: "
+    deleted: "Deleted location: "
+    many: "Locations"
+    edit: "Edit Location"
+    new: "Create Location"
+    single: "Location"
+    name: "Name"
+    abbr: "Loc."
+    see: "(see location)"
+    none: "(no location)"
+    gmaps: "Google Maps link"
+    default: "<new location.>"
+  package:
+    created: "Created package: "
+    deleted: "Deleted package: "
+    duplicate: "Duplicate package: "
+    edit: "Edit package"
+    list: "Packing list"
+    many: "Packages"
+    new: "Create package"
+    single: "Package"
+    updated: "Updated package: "
+  password:
+    single: "Password"
+    blank_abort: "(leave blank to avoid changing it)"
+    change: "Change password"
+    confirm: "Confirm Password"
+    confirm_label: "(*) confirm password"
+    confirm_wait: "Awaiting confirmation from: "
+    min_chars: "Minimum length: "
+    new: "New password"
+    old: "Current password"
+  question:
+    active: "Active?"
+    camera: "Use Camera?"
+    clear: "Clear actions for "
+    delete: "Delete "
+    female: "Female?"
+    import: "Import file?"
+    login: "Open session?"
+    save: "Save "
+    save_chng: "Save Changes?"
+  role:
+    admin: "Administrator"
+    admin_a: "Adm."
+    courier: "Courier"
+    courier_a: "Cour."
+    customer: "Customer"
+    customer_a: "Cust."
+    manager: "Manager"
+    manager_a: "Mngr."
+    sales: "Sales"
+    sales_a: "Sales"
+    user: "User"
+    user_a: "User"
+  salesperson:
+    created: "Created sales person: "
+    deleted: "Deleted sales person: "
+    duplicate: "Duplicate sales person: "
+    edit: "Edit sales person"
+    export: "Exported sales people"
+    import: "Imported sales people"
+    many: "Sales People"
+    new: "Create sales person"
+    single: "Sales person"
+    updated: "Updated sales person: "
+  server:
+    about: "About ..."
+    build: "Build #"
+    info-1: "Free open-source web application to manage"
+    info-2: "courier agencies:"
+    info-3: "Companies that use the platform."
+    info-4: "Customers."
+    info-5: "Deliveries: packing lists, tracking."
+    info-6: "Invoices."
+    log: "Logs"
+    published: "Published under GNU Affero GPLv3 license"
+    single: "Server"
+    website: "MensaGes wiki"
+  stat:
+    average: "Average"
+    average_a: "Avg."
+    many: "Stats"
+    max: "Max."
+    min: "Min."
+    number_a: "Num."
+    total: "Total"
+    total_a: "Tot."
+    updated: "Updated stats"
+  user:
+    actions: "Actions"
+    cleared: "Actions cleared: "
+    created: "Created user: "
+    deleted: "Deleted user: "
+    duplicate: "Duplicate: "
+    edit: "Edit User"
+    last_in: "Last login"
+    many: "Users"
+    never: "(never logged)"
+    new: "Create User"
+    no_email: "e-mail is required!"
+    profile: "Profile"
+    single: "User"
+    updated: "Updated user: "
+  version:
+    many: "Versions"
+    single: "Version"
